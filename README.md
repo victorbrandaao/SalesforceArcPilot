@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Logo](./icons/logo.png)
+<img src="./icons/logo.png" alt="Logo Salesforce ArcPilot" width="160" />
 
 ![Salesforce](https://img.shields.io/badge/Salesforce-00D2FF?style=for-the-badge&logo=salesforce&logoColor=white)
 ![Google Chrome](https://img.shields.io/badge/Google%20Chrome-4285F4?style=for-the-badge&logo=Google-Chrome&logoColor=white)
@@ -111,16 +111,8 @@ Para configurar e executar o Salesforce ArcPilot em seu navegador:
 
 Este projeto é um exemplo do meu trabalho e aprendizado contínuo em desenvolvimento de software e no ecossistema Salesforce. Se você tiver perguntas, sugestões ou quiser discutir oportunidades de colaboração:
 
-- **LinkedIn**: [Link para o seu perfil do LinkedIn]
+- **LinkedIn**: [victorbrandaao](https://linkedin.com/in/victorbrandaao)
 - **GitHub**: [victorbrandaao](https://github.com/victorbrandaao)
 
 ---
 
-## 📝 Notas de Implementação
-
-**Lembre-se de:**
-
-- **Adicionar a logo** (`logo.png`) dentro da pasta `assets` para que a referência no README funcione corretamente.
-- **Colocar a captura de tela** (`.png`) dentro da pasta `assets` e ajustar o caminho da imagem no `README.md` (`./assets/arc-salesforce-orbiter.png`).
-
-Essas imagens farão uma diferença enorme na apresentação visual do seu projeto!
