@@ -1,6 +1,8 @@
-# <img src="./icons/icon48.png" width="32" height="32" alt="Salesforce ArcPilot"> Salesforce ArcPilot
+# 🎉 Salesforce ArcPilot
 
 <div align="center">
+
+![Logo](./icons/logo.png)
 
 ![Salesforce](https://img.shields.io/badge/Salesforce-00D2FF?style=for-the-badge&logo=salesforce&logoColor=white)
 ![Google Chrome](https://img.shields.io/badge/Google%20Chrome-4285F4?style=for-the-badge&logo=Google-Chrome&logoColor=white)
@@ -12,21 +14,7 @@ _Gerenciador de Orgs Salesforce otimizado para o navegador Arc_
 
 ## 📋 Sobre o Projeto
 
-O **Salesforce ArcPilot** é uma extensão de navegador para Arc (compatível com Chrome) projetada para otimizar o fluxo de trabalho de desenvolvedores e administradores Salesforce que gerenciam múltiplas organizações.
-
----
-
-## 🎨 Ícones da Extensão
-
-<div align="center">
-
-| Tamanho | Ícone | Descrição |
-|---------|-------|-----------|
-| 16x16 | <img src="./icons/icon16.png" width="16" height="16" alt="Ícone 16px"> | Ícone pequeno para a barra de ferramentas |
-| 48x48 | <img src="./icons/icon48.png" width="48" height="48" alt="Ícone 48px"> | Ícone médio para gerenciamento de extensões |
-| 128x128 | <img src="./icons/icon128.png" width="128" height="128" alt="Ícone 128px"> | Ícone grande para a Chrome Web Store |
-
-</div>
+O **Salesforce ArcPilot** é uma extensão de navegador para Arc (compatível com Chrome) projetada para otimizar o fluxo de trabalho de desenvolvedores e administradores Salesforce que gerenciam múltiplas organizações. Ele oferece uma interface limpa e intuitiva para listar, acessar e organizar suas orgs, integrando-se de forma eficiente com o seu ambiente de desenvolvimento.
 
 ---
 
@@ -121,15 +109,18 @@ Para configurar e executar o Salesforce ArcPilot em seu navegador:
 
 ## 🤝 Conecte-se Comigo
 
-Este projeto é um exemplo do meu trabalho e aprendizado contínuo em desenvolvimento de software e no ecossistema Salesforce. Se você tiver perguntas, sugestões ou quiser discutir oportunidades de colaboração, não hesite em entrar em contato!
+Este projeto é um exemplo do meu trabalho e aprendizado contínuo em desenvolvimento de software e no ecossistema Salesforce. Se você tiver perguntas, sugestões ou quiser discutir oportunidades de colaboração:
 
 - **LinkedIn**: [Link para o seu perfil do LinkedIn]
 - **GitHub**: [victorbrandaao](https://github.com/victorbrandaao)
 
 ---
 
+## 📝 Notas de Implementação
+
 **Lembre-se de:**
 
-- **Colocar a captura de tela (`.png`)** dentro da pasta `assets` (ou `images`) e ajustar o caminho da imagem no `README.md` (`./assets/arc-salesforce-orbiter.png`).
+- **Adicionar a logo** (`logo.png`) dentro da pasta `assets` para que a referência no README funcione corretamente.
+- **Colocar a captura de tela** (`.png`) dentro da pasta `assets` e ajustar o caminho da imagem no `README.md` (`./assets/arc-salesforce-orbiter.png`).
 
-Essa imagem fará uma diferença enorme na apresentação do seu projeto!
+Essas imagens farão uma diferença enorme na apresentação visual do seu projeto!
