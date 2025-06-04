@@ -1,0 +1,31 @@
+{
+  "appName": { "message": "Salesforce ArcPilot" },
+  "appDescription": {
+    "message": "Manage and quickly switch between your Salesforce orgs in the Arc browser."
+  },
+  "mainTitle": { "message": "My Salesforce Orgs" },
+  "noOrgsAdded": { "message": "No manually added Orgs yet." },
+  "addOrgSectionTitle": { "message": "Add Manual Org" },
+  "orgAliasPlaceholder": { "message": "Org Alias (e.g., Dev Sandbox)" },
+  "orgUrlPlaceholder": { "message": "Login URL (e.g., login.salesforce.com)" },
+  "addOrgButton": { "message": "Add Org" },
+  "openButton": { "message": "Open" },
+  "deleteButton": { "message": "Delete" },
+  "fillFieldsAlert": { "message": "Please fill in both Org Alias and URL." },
+  "confirmDelete": { "message": "Are you sure you want to delete this Org?" },
+  "cliOrgsSectionTitle": { "message": "CLI Authorized Orgs" },
+  "noCliOrgsAvailable": {
+    "message": "No CLI Orgs found. Make sure CLI is configured and orgs are authorized."
+  },
+  "refreshCliOrgsButton": { "message": "Refresh CLI List" },
+  "loadingCliOrgs": { "message": "Loading CLI Orgs..." },
+  "orgOpenSuccess": { "message": "Org {0} opened successfully via CLI!" },
+  "orgOpenError": { "message": "Failed to open Org {0} via CLI: {1}" },
+  "serverCommunicationError": {
+    "message": "Error communicating with local server: {0}"
+  },
+  "serverNotRunningError": {
+    "message": "Error: Local server is not running. Please start it."
+  },
+  "cliListError": { "message": "Error listing CLI Orgs: {0}" }
+}

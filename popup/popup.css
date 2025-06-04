@@ -1,0 +1,238 @@
+/* Paleta de cores inspirada no Arc (cores mais suaves, tons de cinza/azul) */
+:root {
+  --arc-background-light: #f8f8f8;
+  --arc-background-medium: #e0e0e0;
+  --arc-border-color: #d0d0d0;
+  --arc-text-primary: #333333;
+  --arc-text-secondary: #666666;
+  --arc-blue: #0070d2; /* Salesforce blue */
+  --arc-green: #28a745; /* Green for success/add */
+  --arc-red: #dc3545; /* Red for delete/error */
+  --arc-card-background: #ffffff;
+  --arc-shadow: rgba(0, 0, 0, 0.05);
+}
+
+body {
+  font-family: "Inter", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 340px; /* Levemente mais largo para mais espaço */
+  background-color: var(--arc-background-light);
+  color: var(--arc-text-primary);
+  font-size: 14px;
+  line-height: 1.5; /* Melhorar legibilidade */
+}
+
+.container {
+  padding: 20px; /* Mais padding geral */
+}
+
+.title-heading {
+  font-size: 1.6em; /* Título maior */
+  font-weight: 700; /* Mais negrito */
+  color: var(--arc-blue);
+  margin-bottom: 25px;
+  text-align: center;
+  letter-spacing: -0.02em; /* Um toque de estilo */
+}
+
+.section-card {
+  background-color: var(--arc-card-background);
+  border-radius: 12px; /* Mais arredondado, estilo Arc */
+  box-shadow: 0 4px 15px var(--arc-shadow); /* Sombra mais suave */
+  padding: 20px;
+  margin-bottom: 25px;
+  border: 1px solid var(--arc-background-medium); /* Borda sutil */
+}
+
+.section-heading {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: var(--arc-text-primary);
+  margin-top: 0;
+  margin-bottom: 15px;
+  display: flex; /* Para alinhar título e botão de refresh */
+  justify-content: space-between;
+  align-items: center;
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--arc-border-color);
+  margin: 30px 0; /* Mais espaço para o divisor */
+  opacity: 0.7;
+}
+
+/* Estilos para as listas de organizações */
+.org-list {
+  max-height: 250px; /* Mais altura */
+  overflow-y: auto;
+  border: none; /* Remover borda interna, já está no section-card */
+  border-radius: 0;
+  padding: 0;
+  background-color: transparent; /* Fundo transparente */
+  margin-bottom: 0; /* Gerenciado pelo section-card */
+  box-shadow: none; /* Remover sombra interna */
+}
+
+.org-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0; /* Mais padding */
+  border-bottom: 1px solid var(--arc-background-medium); /* Linhas mais claras */
+}
+
+.org-item:last-child {
+  border-bottom: none;
+}
+
+.org-info {
+  flex-grow: 1;
+  margin-right: 15px;
+}
+
+.org-info span {
+  display: block;
+}
+
+.org-info .alias {
+  font-weight: 600;
+  color: var(--arc-blue); /* Alias em azul */
+  font-size: 1.05em;
+}
+
+.org-info .username {
+  /* Novo estilo para username em Orgs CLI */
+  font-size: 0.9em;
+  color: var(--arc-text-secondary);
+  margin-top: 2px;
+}
+
+.org-info .url {
+  color: var(--arc-text-secondary);
+  font-size: 0.8em;
+  word-break: break-all;
+  margin-top: 2px;
+}
+
+/* Destaque para Org Padrão do CLI */
+.default-org-highlight .alias {
+  color: var(--arc-green); /* Alias verde para org padrão */
+}
+.default-org-highlight::after {
+  content: " (Padrão)";
+  font-size: 0.7em;
+  font-weight: normal;
+  color: var(--arc-text-secondary);
+}
+
+.org-actions button {
+  background-color: var(--arc-blue);
+  color: white;
+  border: none;
+  padding: 8px 15px; /* Mais padding nos botões */
+  border-radius: 6px; /* Mais arredondado */
+  cursor: pointer;
+  font-size: 0.85em;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.org-actions .delete-btn {
+  background-color: var(--arc-red);
+  font-size: 1.2em; /* 'x' maior */
+  padding: 6px 10px; /* Mais compacto para 'x' */
+  line-height: 1; /* Alinha o 'x' */
+}
+
+.org-actions button:hover {
+  filter: brightness(1.1); /* Efeito de brilho no hover */
+}
+.org-actions .delete-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* Estilos para campos de entrada e botão de adicionar */
+.manual-org-form input[type="text"] {
+  width: calc(100% - 20px); /* Ajuste de padding */
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--arc-border-color);
+  border-radius: 8px; /* Mais arredondado */
+  box-sizing: border-box;
+  font-size: 1em;
+  background-color: var(--arc-card-background);
+  color: var(--arc-text-primary);
+}
+
+.manual-org-form input[type="text"]::placeholder {
+  color: var(--arc-text-secondary);
+  opacity: 0.7;
+}
+
+.add-button {
+  /* Botão de adicionar org manual */
+  background-color: var(--arc-green) !important;
+  color: white;
+  border: none;
+  padding: 12px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1em;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.add-button:hover {
+  filter: brightness(1.1);
+}
+
+/* Mensagens de estado */
+.message {
+  text-align: center;
+  color: var(--arc-text-secondary);
+  font-style: italic;
+  padding: 15px;
+}
+
+.loading-message {
+  color: var(--arc-blue);
+  font-weight: 500;
+}
+
+/* Botão de refresh para a lista do CLI */
+.refresh-btn {
+  background-color: var(
+    --arc-text-secondary
+  ) !important; /* Cinza para refresh */
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: normal; /* Menos bold que botões primários */
+  transition: all 0.2s ease;
+  align-self: flex-start; /* Alinha com o topo do título */
+  width: auto; /* Permite o botão ter seu próprio tamanho */
+}
+
+.refresh-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* Esconder scrollbar, estilo Arc */
+/* Works for Firefox */
+html {
+  scrollbar-width: none;
+}
+/* Works for Chrome, Edge, and Safari */
+body::-webkit-scrollbar {
+  display: none;
+}
+#org-list::-webkit-scrollbar,
+#cli-org-list::-webkit-scrollbar {
+  display: none;
+}

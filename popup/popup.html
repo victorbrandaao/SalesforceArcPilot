@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Salesforce ArcPilot</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="main-title" class="title-heading"></h1>
+
+      <div class="section-card">
+        <h2 id="cli-orgs-section-title" class="section-heading"></h2>
+        <button id="refresh-cli-orgs-btn" class="refresh-btn"></button>
+        <div id="cli-org-list" class="org-list">
+          <p class="message" id="no-cli-orgs-message"></p>
+          <p class="message loading-message"></p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-card">
+        <h2 id="add-org-section-title" class="section-heading"></h2>
+        <div class="manual-org-form">
+          <input type="text" id="org-alias" required />
+          <input type="text" id="org-url" required />
+          <button id="add-org-btn" class="add-button"></button>
+        </div>
+        <div id="org-list" class="org-list manual-list">
+          <p class="message" id="no-orgs-message"></p>
+        </div>
+      </div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
