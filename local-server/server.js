@@ -84,13 +84,39 @@ app.get("/cli-info", (req, res) => {
 
   const cliCommand = "sf version --json";
 
-  exec(cliCommand, (error, stdout, stderr) => {
+  // Adicionar timeout de 10 segundos para evitar travamento
+  const timeout = setTimeout(() => {
+    console.error("CLI check timeout after 10 seconds");
+    res.status(408).json({
+      success: false,
+      message:
+        "Timeout ao verificar CLI - operação demorou mais de 10 segundos",
+      cliInstalled: false,
+      timeout: true,
+    });
+  }, 10000);
+
+  exec(cliCommand, { timeout: 8000 }, (error, stdout, stderr) => {
+    clearTimeout(timeout);
+
     if (error) {
       console.error(`CLI info error: ${error}`);
+
+      // Verificar se é erro de timeout específico
+      if (error.killed && error.signal === "SIGTERM") {
+        return res.status(408).json({
+          success: false,
+          message: "Timeout ao verificar CLI - comando foi interrompido",
+          cliInstalled: false,
+          timeout: true,
+        });
+      }
+
       return res.status(500).json({
         success: false,
         message: "Salesforce CLI não encontrado ou não instalado",
         cliInstalled: false,
+        error: error.message,
       });
     }
 
@@ -189,12 +215,29 @@ app.get("/list-orgs", (req, res) => {
 
   const cliCommand = "sf org list --json";
 
-  exec(cliCommand, { timeout: 30000 }, (error, stdout, stderr) => {
+  // Adicionar timeout de 15 segundos para evitar travamento
+  const timeout = setTimeout(() => {
+    console.error(`[${timestamp}] CLI list timeout after 15 seconds`);
+    res.status(408).json({
+      success: false,
+      message: "Timeout ao listar orgs - operação demorou mais de 15 segundos",
+      timestamp: timestamp,
+      timeout: true,
+    });
+  }, 15000);
+
+  exec(cliCommand, { timeout: 12000 }, (error, stdout, stderr) => {
+    clearTimeout(timeout);
+
     if (error) {
       console.error(`[${timestamp}] CLI list error: ${error}`);
 
       let errorMessage = "Erro ao listar Orgs via CLI";
-      if (error.code === "TIMEOUT") {
+
+      // Verificar se é erro de timeout específico
+      if (error.killed && error.signal === "SIGTERM") {
+        errorMessage = "Timeout ao listar orgs - comando foi interrompido";
+      } else if (error.code === "TIMEOUT") {
         errorMessage = "Timeout: CLI demorou muito para listar as orgs";
       } else if (
         error.message.includes("not found") ||
@@ -202,6 +245,19 @@ app.get("/list-orgs", (req, res) => {
       ) {
         errorMessage =
           "Salesforce CLI não encontrado. Verifique se está instalado.";
+      } else if (error.message.includes("No orgs found")) {
+        // Este não é um erro real, apenas não há orgs
+        return res.json({
+          success: true,
+          orgs: [],
+          metadata: {
+            totalOrgs: 0,
+            nonScratchOrgs: 0,
+            scratchOrgs: 0,
+            timestamp: timestamp,
+            message: "Nenhuma org autorizada encontrada",
+          },
+        });
       } else {
         errorMessage = `Erro CLI: ${stderr || error.message}`;
       }
@@ -210,6 +266,7 @@ app.get("/list-orgs", (req, res) => {
         success: false,
         message: errorMessage,
         timestamp: timestamp,
+        error: error.message,
       });
     }
 

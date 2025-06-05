@@ -22,6 +22,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const noCliOrgsMessage = document.getElementById("no-cli-orgs-message");
   const refreshCliOrgsBtn = document.getElementById("refresh-cli-orgs-btn");
 
+  // === PIX DONATION COMPONENTS ===
+  const toggleDonationBtn = document.getElementById("toggle-donation");
+  const donationContent = document.getElementById("donation-content");
+  const pixKey = document.getElementById("pix-key");
+  const copyPixBtn = document.querySelector("[data-action='copy-pix']");
+  const amountButtons = document.querySelectorAll(".amount-btn");
+
   // === ANALYTICS DATA ===
   let analyticsData = {
     totalOpens: 0,
@@ -183,7 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Setup search functionality
     if (searchInput) {
       searchInput.addEventListener("input", handleSearch);
-      searchInput.placeholder = "Buscar orgs...";
+      searchInput.placeholder =
+        chrome.i18n.getMessage("searchPlaceholder") ||
+        "🔍 Buscar organizações...";
     }
 
     // Setup filter buttons
@@ -197,8 +206,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const isHidden = manualOrgForm.style.display === "none";
         manualOrgForm.style.display = isHidden ? "block" : "none";
         toggleFormBtn.textContent = isHidden
-          ? "Ocultar Formulário"
-          : "Adicionar Org Manual";
+          ? chrome.i18n.getMessage("hideForm") || "Ocultar Formulário"
+          : chrome.i18n.getMessage("showForm") || "Adicionar Org Manual";
       });
     }
 
@@ -221,7 +230,11 @@ document.addEventListener("DOMContentLoaded", () => {
         updateStatus("loading");
         loadCliOrgs();
         loadManualOrgs();
-        showToast("Atualizando todas as orgs...", "info");
+        showToast(
+          chrome.i18n.getMessage("refreshingAll") ||
+            "Atualizando todas as orgs...",
+          "info"
+        );
       });
     }
 
@@ -229,6 +242,59 @@ document.addEventListener("DOMContentLoaded", () => {
     if (refreshCliOrgsBtn)
       refreshCliOrgsBtn.addEventListener("click", loadCliOrgs);
     if (addOrgBtn) addOrgBtn.addEventListener("click", handleAddOrg);
+
+    // Setup donation section
+    if (toggleDonationBtn && donationContent) {
+      toggleDonationBtn.addEventListener("click", () => {
+        const isCollapsed = donationContent.classList.contains("collapsed");
+        donationContent.classList.toggle("collapsed");
+
+        // Rotate arrow icon
+        const icon = toggleDonationBtn.querySelector("svg");
+        if (icon) {
+          icon.style.transform = isCollapsed
+            ? "rotate(0deg)"
+            : "rotate(180deg)";
+        }
+      });
+    }
+
+    // Setup PIX copy functionality
+    if (copyPixBtn && pixKey) {
+      copyPixBtn.addEventListener("click", () => {
+        copyToClipboard(pixKey.value);
+        showToast("Chave PIX copiada! 💚", "success", 3000);
+
+        // Track donation interest
+        analyticsData.donationInterest =
+          (analyticsData.donationInterest || 0) + 1;
+        saveAnalytics();
+      });
+    }
+
+    // Setup amount buttons
+    amountButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const amount = button.dataset.amount;
+        showToast(
+          `Valor sugerido: R$ ${amount} - Use a chave PIX acima!`,
+          "info",
+          5000
+        );
+
+        // Track preferred amounts
+        analyticsData.preferredAmount = amount;
+        saveAnalytics();
+
+        // Highlight the PIX key
+        if (pixKey) {
+          pixKey.select();
+          pixKey.focus();
+        }
+      });
+    });
+
+    // ...existing code...
   }
 
   // Search and filter functionality
