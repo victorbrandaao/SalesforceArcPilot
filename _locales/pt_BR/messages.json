@@ -29,5 +29,31 @@
   "serverNotRunningError": {
     "message": "Erro: O servidor local não está rodando. Por favor, inicie-o."
   },
-  "cliListError": { "message": "Erro ao listar Orgs do CLI: {0}" }
+  "cliListError": { "message": "Erro ao listar Orgs do CLI: {0}" },
+  "searchPlaceholder": { "message": "Buscar orgs..." },
+  "filterAll": { "message": "Todas" },
+  "filterCli": { "message": "CLI" },
+  "filterManual": { "message": "Manuais" },
+  "filterFavorites": { "message": "Favoritas" },
+  "quickActionsTitle": { "message": "Ações Rápidas" },
+  "refreshAllButton": { "message": "Atualizar Tudo" },
+  "settingsButton": { "message": "Configurações" },
+  "analyticsTitle": { "message": "Estatísticas de Uso" },
+  "totalOpens": { "message": "Total de Aberturas" },
+  "cliOpens": { "message": "Aberturas via CLI" },
+  "manualOpens": { "message": "Aberturas Manuais" },
+  "lastUsed": { "message": "Último Uso" },
+  "settingsTitle": { "message": "Configurações" },
+  "closeButton": { "message": "Fechar" },
+  "saveButton": { "message": "Salvar" },
+  "copyUrlSuccess": { "message": "URL copiada para área de transferência!" },
+  "copyUrlError": { "message": "Erro ao copiar URL" },
+  "addedToFavorites": { "message": "Org adicionada aos favoritos" },
+  "removedFromFavorites": { "message": "Org removida dos favoritos" },
+  "orgAddedSuccess": { "message": "Org \"{0}\" adicionada com sucesso!" },
+  "orgRemovedSuccess": { "message": "Org \"{0}\" removida com sucesso!" },
+  "duplicateOrgError": { "message": "Org com este alias ou URL já existe" },
+  "invalidUrlError": { "message": "URL deve ser um domínio Salesforce válido" },
+  "toggleFormShow": { "message": "Adicionar Org Manual" },
+  "toggleFormHide": { "message": "Ocultar Formulário" }
 }

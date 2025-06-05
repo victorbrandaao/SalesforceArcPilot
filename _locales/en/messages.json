@@ -27,5 +27,33 @@
   "serverNotRunningError": {
     "message": "Error: Local server is not running. Please start it."
   },
-  "cliListError": { "message": "Error listing CLI Orgs: {0}" }
+  "cliListError": { "message": "Error listing CLI Orgs: {0}" },
+  "searchPlaceholder": { "message": "Search orgs..." },
+  "filterAll": { "message": "All" },
+  "filterCli": { "message": "CLI" },
+  "filterManual": { "message": "Manual" },
+  "filterFavorites": { "message": "Favorites" },
+  "quickActionsTitle": { "message": "Quick Actions" },
+  "refreshAllButton": { "message": "Refresh All" },
+  "settingsButton": { "message": "Settings" },
+  "analyticsTitle": { "message": "Usage Analytics" },
+  "totalOpens": { "message": "Total Opens" },
+  "cliOpens": { "message": "CLI Opens" },
+  "manualOpens": { "message": "Manual Opens" },
+  "lastUsed": { "message": "Last Used" },
+  "settingsTitle": { "message": "Settings" },
+  "closeButton": { "message": "Close" },
+  "saveButton": { "message": "Save" },
+  "copyUrlSuccess": { "message": "URL copied to clipboard!" },
+  "copyUrlError": { "message": "Error copying URL" },
+  "addedToFavorites": { "message": "Org added to favorites" },
+  "removedFromFavorites": { "message": "Org removed from favorites" },
+  "orgAddedSuccess": { "message": "Org \"{0}\" added successfully!" },
+  "orgRemovedSuccess": { "message": "Org \"{0}\" removed successfully!" },
+  "duplicateOrgError": {
+    "message": "Org with this alias or URL already exists"
+  },
+  "invalidUrlError": { "message": "URL must be a valid Salesforce domain" },
+  "toggleFormShow": { "message": "Add Manual Org" },
+  "toggleFormHide": { "message": "Hide Form" }
 }

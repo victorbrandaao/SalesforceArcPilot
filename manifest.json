@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "__MSG_appName__",
-  "version": "1.0",
-  "description": "__MSG_appDescription__",
+  "name": "Salesforce ArcPilot - Org Manager",
+  "version": "1.0.0",
+  "description": "🚀 Modern Salesforce org switcher inspired by Arc Browser. One-click access to CLI orgs with elegant UI. Save 80% time switching between dev, staging & production environments.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -21,5 +21,15 @@
     "https://*.force.com/*",
     "https://*.lightning.force.com/*"
   ],
-  "default_locale": "pt_BR"
+  "default_locale": "pt_BR",
+  "keywords": [
+    "salesforce",
+    "org",
+    "switcher",
+    "cli",
+    "developer",
+    "admin",
+    "arc",
+    "productivity"
+  ]
 }

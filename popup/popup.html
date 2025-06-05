@@ -3,35 +3,262 @@
   <head>
     <title>Salesforce ArcPilot</title>
     <link rel="stylesheet" href="popup.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
     <div class="container">
+      <!-- Header melhorado com indicadores de status -->
       <div class="header">
-        <img src="../icons/logo.png" alt="Salesforce ArcPilot" class="logo" />
-        <h1 id="main-title" class="title-heading"></h1>
+        <div class="header-content">
+          <img src="../icons/logo.png" alt="Salesforce ArcPilot" class="logo" />
+          <div class="header-text">
+            <h1 id="main-title" class="title-heading"></h1>
+            <div class="status-indicators">
+              <span id="cli-status" class="status-indicator">
+                <span class="status-dot checking"></span>
+                <span id="cli-status-text">Verificando CLI...</span>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="section-card">
-        <h2 id="cli-orgs-section-title" class="section-heading"></h2>
-        <button id="refresh-cli-orgs-btn" class="refresh-btn"></button>
-        <div id="cli-org-list" class="org-list">
-          <p class="message" id="no-cli-orgs-message"></p>
-          <p class="message loading-message"></p>
+      <!-- Quick Actions Bar -->
+      <div class="quick-actions">
+        <button id="refresh-all-btn" class="action-btn primary">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path
+              d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+            ></path>
+          </svg>
+          <span id="refresh-all-text">Atualizar Tudo</span>
+        </button>
+        <button id="settings-btn" class="action-btn secondary">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="m12 1 2.9 5.4 6.1.9-4.5 4.3 1.1 6.4L12 15.4l-5.6 2.6 1.1-6.4L3 7.3l6.1-.9L12 1z"
+            ></path>
+          </svg>
+          <span id="settings-text">Configurações</span>
+        </button>
+      </div>
+
+      <!-- CLI Orgs Section - Melhorada -->
+      <div class="section-card cli-section">
+        <div class="section-header">
+          <div class="section-info">
+            <h2 id="cli-orgs-section-title" class="section-heading"></h2>
+            <span id="cli-org-count" class="org-count">0 orgs</span>
+          </div>
+          <div class="section-actions">
+            <button id="search-toggle-btn" class="icon-btn" title="Buscar">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </button>
+            <button
+              id="refresh-cli-orgs-btn"
+              class="icon-btn"
+              title="Atualizar"
+            ></button>
+          </div>
         </div>
+
+        <!-- Search Bar -->
+        <div id="search-bar" class="search-bar hidden">
+          <input
+            type="text"
+            id="org-search"
+            placeholder="Buscar por alias, username ou URL..."
+          />
+          <button id="clear-search" class="clear-btn">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div id="cli-org-list" class="org-list cli-list">
+          <div class="loading-skeleton">
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+            <div class="skeleton-item"></div>
+          </div>
+        </div>
+        <p class="message" id="no-cli-orgs-message" style="display: none"></p>
       </div>
 
       <div class="divider"></div>
-      <div class="section-card">
-        <h2 id="add-org-section-title" class="section-heading"></h2>
-        <div class="manual-org-form">
-          <input type="text" id="org-alias" required />
-          <input type="text" id="org-url" required />
-          <button id="add-org-btn" class="add-button"></button>
+
+      <!-- Manual Orgs Section - Melhorada -->
+      <div class="section-card manual-section">
+        <div class="section-header">
+          <div class="section-info">
+            <h2 id="add-org-section-title" class="section-heading"></h2>
+            <span id="manual-org-count" class="org-count">0 orgs</span>
+          </div>
+          <button id="toggle-add-form" class="icon-btn" title="Adicionar Org">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
         </div>
+
+        <!-- Formulário expandido -->
+        <div id="manual-org-form" class="manual-org-form collapsed">
+          <div class="form-grid">
+            <div class="input-group">
+              <label for="org-alias" id="alias-label">Alias da Org</label>
+              <input type="text" id="org-alias" required autocomplete="off" />
+            </div>
+            <div class="input-group">
+              <label for="org-url" id="url-label">URL da Org</label>
+              <input type="url" id="org-url" required autocomplete="off" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button id="add-org-btn" class="add-button"></button>
+            <button id="cancel-add-btn" class="cancel-button">Cancelar</button>
+          </div>
+        </div>
+
         <div id="org-list" class="org-list manual-list">
-          <p class="message" id="no-orgs-message"></p>
+          <p class="message" id="no-orgs-message" style="display: none"></p>
         </div>
       </div>
+
+      <!-- Analytics Panel (Opcional) -->
+      <div
+        class="section-card analytics-section collapsed"
+        id="analytics-section"
+      >
+        <div class="section-header">
+          <h3 class="section-heading">📊 Estatísticas de Uso</h3>
+          <button id="toggle-analytics" class="icon-btn">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <div class="analytics-content">
+          <div class="stat-grid">
+            <div class="stat-item">
+              <span class="stat-value" id="total-opens">0</span>
+              <span class="stat-label">Orgs Abertas</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="time-saved">0min</span>
+              <span class="stat-label">Tempo Economizado</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="most-used-org">-</span>
+              <span class="stat-label">Org Mais Usada</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+      <div class="modal-content settings-modal">
+        <div class="modal-header">
+          <h3>⚙️ Configurações</h3>
+          <button id="close-settings" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-group">
+            <label class="setting-label">
+              <input type="checkbox" id="auto-refresh" checked />
+              <span class="checkmark"></span>
+              <span>Atualização automática a cada 30s</span>
+            </label>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">
+              <input type="checkbox" id="show-analytics" />
+              <span class="checkmark"></span>
+              <span>Mostrar estatísticas de uso</span>
+            </label>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">
+              <input type="checkbox" id="confirm-delete" checked />
+              <span class="checkmark"></span>
+              <span>Confirmar antes de excluir org</span>
+            </label>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">
+              <select id="theme-select">
+                <option value="auto">Tema automático</option>
+                <option value="light">Tema claro</option>
+                <option value="dark">Tema escuro</option>
+              </select>
+              <span>Tema da interface</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="reset-settings" class="secondary-btn">
+            Restaurar Padrões
+          </button>
+          <button id="save-settings" class="primary-btn">Salvar</button>
+        </div>
+      </div>
+      <div class="modal-overlay"></div>
     </div>
 
     <!-- Rodapé com sistema de doações -->
