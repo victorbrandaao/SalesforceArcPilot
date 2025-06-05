@@ -80,8 +80,7 @@
   "smartFilters": { "message": "Smart filters for quick organization finding" },
   "favoriteSystem": { "message": "Favorites system with one-click access" },
   "analyticsTracking": { "message": "Usage analytics and productivity insights" },
-  "modernUI": { "message": "Modern glassmorphism UI with dark mode support" }
-},
+  "modernUI": { "message": "Modern glassmorphism UI with dark mode support" },
   "orgRemovedSuccess": { "message": "Org \"{0}\" removed successfully!" },
   "duplicateOrgError": {
     "message": "Org with this alias or URL already exists"

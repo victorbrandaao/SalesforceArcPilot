@@ -1011,7 +1011,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+
   // Initialize the extension
   updateStatus("loading");
-  checkServerHealth();
 });

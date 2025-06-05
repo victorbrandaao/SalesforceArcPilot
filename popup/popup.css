@@ -1299,3 +1299,343 @@ body {
 /* ==========================================
    UTILITY CLASSES CONTINUATION
    ========================================== */
+
+/* ==========================================
+   PIX DONATION MODAL & FOOTER
+   ========================================== */
+
+/* Footer styles */
+.footer {
+  margin-top: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.05) 0%,
+    rgba(251, 191, 36, 0.03) 100%
+  );
+  border-top: 1px solid var(--border-color);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.support-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.support-section:hover {
+  border-color: var(--accent-orange);
+  box-shadow: var(--shadow-sm);
+}
+
+.support-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.support-text {
+  flex: 1;
+}
+
+.support-title {
+  margin: 0 0 4px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.support-subtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.donate-btn {
+  background: linear-gradient(135deg, var(--accent-orange) 0%, #f59e0b 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.donate-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.donate-btn:active {
+  transform: translateY(0);
+}
+
+/* Donation Modal Specific Styles */
+.donation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.donation-modal .modal-content {
+  max-width: 480px;
+  width: 90%;
+}
+
+.pix-section {
+  text-align: center;
+}
+
+.pix-icon {
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+
+.qr-code {
+  margin: 24px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.qr-code .qr-placeholder {
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(
+    135deg,
+    var(--primary-bg) 0%,
+    rgba(245, 158, 11, 0.1) 100%
+  );
+  border: 2px dashed var(--accent-orange);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-orange);
+}
+
+.qr-code .qr-placeholder p {
+  margin: 8px 0 0 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.pix-key {
+  margin: 24px 0;
+}
+
+.pix-key label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.pix-key-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pix-key-input input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  font-size: 0.9rem;
+  background: var(--primary-bg);
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.copy-btn {
+  background: linear-gradient(135deg, var(--accent-orange) 0%, #f59e0b 100%);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.copy-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.copy-btn.copied {
+  background: linear-gradient(135deg, var(--accent-green) 0%, #10b981 100%);
+  transform: scale(1.05);
+}
+
+.suggested-amounts {
+  margin: 24px 0;
+}
+
+.suggested-amounts p {
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.thank-you {
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1) 0%,
+    rgba(5, 150, 105, 0.05) 100%
+  );
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.thank-you p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--accent-green);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Developer info */
+.developer-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.developer-link {
+  color: var(--accent-blue);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.developer-link:hover {
+  color: var(--text-primary);
+}
+
+/* Enhanced amount buttons for modal */
+.donation-modal .amount-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.donation-modal .amount-btn {
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.donation-modal .amount-btn.active {
+  background: var(--accent-orange);
+  color: white;
+  border-color: var(--accent-orange);
+  box-shadow: var(--shadow-md);
+}
+
+/* Copy button feedback animations */
+@keyframes copySuccess {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.copy-pix-btn.copied,
+.copy-btn.copied {
+  animation: copySuccess 0.3s ease;
+}
+
+/* Responsive adjustments for donation modal */
+@media (max-width: 480px) {
+  .donation-modal .modal-content {
+    width: 95%;
+    margin: 0 auto;
+  }
+  
+  .qr-code .qr-placeholder {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .donation-modal .amount-buttons {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  .support-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .donate-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Amount button active state with better visual feedback */
+.amount-btn.active {
+  background: var(--accent-orange);
+  color: white;
+  border-color: var(--accent-orange);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Smooth transitions for section expansion */
+.donation-content {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Section header icon rotation */
+#toggle-donation svg {
+  transition: transform 0.3s ease;
+}
+
+#toggle-donation[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
