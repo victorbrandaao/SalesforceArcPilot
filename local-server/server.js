@@ -5,13 +5,25 @@ const app = express();
 const port = 3000;
 
 const allowedOrigins = [
-  "chrome-extension://[cnolefaddfjpaafobjcgeeoijhhdmlje]", // SUBSTITUA COM O ID REAL DA SUA EXTENSÃO!
+  // Permitir requisições de extensões do Chrome
+  /^chrome-extension:\/\/.+$/,
+  // Para desenvolvimento local
+  "http://localhost:3000",
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) {
+        // Permitir requisições sem origin (ex: extensões)
+        callback(null, true);
+      } else if (
+        allowedOrigins.some((pattern) =>
+          typeof pattern === "string"
+            ? pattern === origin
+            : pattern.test(origin)
+        )
+      ) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));

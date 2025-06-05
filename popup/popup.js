@@ -20,6 +20,16 @@ document.addEventListener("DOMContentLoaded", () => {
     "refreshCliOrgsButton"
   );
 
+  // Adicionar ícone de refresh
+  refreshCliOrgsBtn.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="23 4 23 10 17 10"></polyline>
+      <polyline points="1 20 1 14 7 14"></polyline>
+      <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+    </svg>
+    ${chrome.i18n.getMessage("refreshCliOrgsButton")}
+  `;
+
   document.getElementById("add-org-section-title").textContent =
     chrome.i18n.getMessage("addOrgSectionTitle");
   orgAliasInput.placeholder = chrome.i18n.getMessage("orgAliasPlaceholder");
@@ -50,8 +60,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="org-actions">
                             <button data-action="open-manual" data-url="${
                               org.url
-                            }">${chrome.i18n.getMessage("openButton")}</button>
-                            <button data-action="delete-manual" data-index="${index}" class="delete-btn">×</button>
+                            }" class="open-btn">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                              </svg>
+                              ${chrome.i18n.getMessage("openButton")}
+                            </button>
+                            <button data-action="delete-manual" data-index="${index}" class="delete-btn">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                              </svg>
+                            </button>
                         </div>
                     `; // Fechamento do template literal
           orgListDiv.appendChild(orgItem);
@@ -76,10 +96,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Função para carregar e exibir Orgs do CLI
   function loadCliOrgs() {
+    // Adicionar classe loading ao botão refresh
+    refreshCliOrgsBtn.classList.add("loading");
+    refreshCliOrgsBtn.disabled = true;
+
     cliOrgListDiv.innerHTML =
-      '<p class="message loading-message">' +
+      '<div class="message loading-message">' +
+      '<div style="display: flex; align-items: center; gap: 8px; justify-content: center;">' +
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">' +
+      '<circle cx="12" cy="12" r="10"></circle>' +
+      '<path d="m16 12-4-4-4 4"></path>' +
+      '<path d="m16 12-4 4-4-4"></path>' +
+      "</svg>" +
       chrome.i18n.getMessage("loadingCliOrgs") +
-      "</p>"; // Mensagem de carregamento
+      "</div>" +
+      "</div>";
     noCliOrgsMessage.style.display = "none";
 
     fetch("http://localhost:3000/list-orgs")
@@ -94,6 +125,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return response.json();
       })
       .then((data) => {
+        // Remover estado de loading
+        refreshCliOrgsBtn.classList.remove("loading");
+        refreshCliOrgsBtn.disabled = false;
+
         if (data.success) {
           const cliOrgs = data.orgs || [];
           cliOrgListDiv.innerHTML = "";
@@ -109,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
               const defaultClass = org.isDefault
                 ? " default-org-highlight"
                 : "";
-              const orgIcon = org.isDefault ? "⚡️" : "⚙️"; // Ícone para padrão/não padrão
+              const orgIcon = org.isDefault ? "⚡" : "🏢"; // Ícones mais elegantes
 
               // Mais informações visíveis: username, instanceUrl
               orgItem.innerHTML = `
@@ -125,9 +160,12 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <div class="org-actions">
                                     <button data-action="open-cli" data-alias="${
                                       org.alias || org.username
-                                    }">${chrome.i18n.getMessage(
-                "openButton"
-              )}</button>
+                                    }" class="open-btn">
+                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="m9 18 6-6-6-6"/>
+                                      </svg>
+                                      ${chrome.i18n.getMessage("openButton")}
+                                    </button>
                                 </div>
                             `;
               cliOrgListDiv.appendChild(orgItem);
@@ -150,6 +188,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       })
       .catch((error) => {
+        // Remover estado de loading
+        refreshCliOrgsBtn.classList.remove("loading");
+        refreshCliOrgsBtn.disabled = false;
+
         cliOrgListDiv.innerHTML = "";
         noCliOrgsMessage.style.display = "block";
         if (error.message.includes("Failed to fetch")) {

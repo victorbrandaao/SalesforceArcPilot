@@ -6,7 +6,10 @@
   </head>
   <body>
     <div class="container">
-      <h1 id="main-title" class="title-heading"></h1>
+      <div class="header">
+        <img src="../icons/logo.png" alt="Salesforce ArcPilot" class="logo" />
+        <h1 id="main-title" class="title-heading"></h1>
+      </div>
 
       <div class="section-card">
         <h2 id="cli-orgs-section-title" class="section-heading"></h2>
@@ -30,6 +33,159 @@
         </div>
       </div>
     </div>
+
+    <!-- Rodapé com sistema de doações -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="support-section">
+          <div class="support-icon">☕</div>
+          <div class="support-text">
+            <p class="support-title" id="support-title">Gostou da extensão?</p>
+            <p class="support-subtitle" id="support-subtitle">
+              Apoie o desenvolvimento
+            </p>
+          </div>
+          <button class="donate-btn" id="donate-btn">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              />
+            </svg>
+            <span id="donate-text">Doar com PIX</span>
+          </button>
+        </div>
+
+        <!-- Modal de doação -->
+        <div class="donation-modal" id="donation-modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 id="modal-title">💝 Apoie este projeto</h3>
+              <button class="close-btn" id="close-modal">×</button>
+            </div>
+            <div class="modal-body">
+              <div class="pix-section">
+                <div class="pix-icon">📱</div>
+                <p id="pix-instructions">
+                  Escaneie o QR Code ou copie a chave PIX:
+                </p>
+
+                <!-- QR Code placeholder -->
+                <div class="qr-code">
+                  <div class="qr-placeholder">
+                    <svg
+                      width="120"
+                      height="120"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1"
+                    >
+                      <rect x="3" y="3" width="7" height="7" />
+                      <rect x="14" y="3" width="7" height="7" />
+                      <rect x="3" y="14" width="7" height="7" />
+                      <path d="m5 5 2 2" />
+                      <path d="m5 17 2 2" />
+                      <path d="m17 5 2 2" />
+                      <path d="m15 15 1 1" />
+                      <path d="m18 15 1 1" />
+                      <path d="m15 18 1 1" />
+                      <path d="m18 18 1 1" />
+                    </svg>
+                    <p id="qr-placeholder-text">QR Code PIX</p>
+                  </div>
+                </div>
+
+                <!-- Chave PIX -->
+                <div class="pix-key">
+                  <label id="pix-key-label">Chave PIX:</label>
+                  <div class="pix-key-input">
+                    <input
+                      type="text"
+                      id="pix-key"
+                      value="victorbrandao@example.com"
+                      readonly
+                    />
+                    <button class="copy-btn" id="copy-pix">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <rect
+                          x="9"
+                          y="9"
+                          width="13"
+                          height="13"
+                          rx="2"
+                          ry="2"
+                        />
+                        <path
+                          d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Valores sugeridos -->
+                <div class="suggested-amounts">
+                  <p id="suggested-amounts-label">Valores sugeridos:</p>
+                  <div class="amount-buttons">
+                    <button class="amount-btn" data-amount="5">R$ 5</button>
+                    <button class="amount-btn" data-amount="10">R$ 10</button>
+                    <button class="amount-btn" data-amount="20">R$ 20</button>
+                    <button class="amount-btn" data-amount="50">R$ 50</button>
+                  </div>
+                </div>
+
+                <div class="thank-you">
+                  <p id="thank-you-text">
+                    💚 Sua contribuição ajuda a manter este projeto ativo e
+                    gratuito!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-overlay"></div>
+        </div>
+
+        <!-- Informações do desenvolvedor -->
+        <div class="developer-info">
+          <span id="developer-text">Desenvolvido por</span>
+          <a
+            href="https://github.com/victorbrandaao"
+            target="_blank"
+            class="developer-link"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+              />
+            </svg>
+            Victor Brandão
+          </a>
+        </div>
+      </div>
+    </footer>
+
     <script src="popup.js"></script>
   </body>
 </html>

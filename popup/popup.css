@@ -1,238 +1,840 @@
-/* Paleta de cores inspirada no Arc (cores mais suaves, tons de cinza/azul) */
+/* Importar fontes modernas */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+/* Paleta de cores moderna inspirada no Arc Browser e Salesforce */
 :root {
-  --arc-background-light: #f8f8f8;
-  --arc-background-medium: #e0e0e0;
-  --arc-border-color: #d0d0d0;
-  --arc-text-primary: #333333;
-  --arc-text-secondary: #666666;
-  --arc-blue: #0070d2; /* Salesforce blue */
-  --arc-green: #28a745; /* Green for success/add */
-  --arc-red: #dc3545; /* Red for delete/error */
-  --arc-card-background: #ffffff;
-  --arc-shadow: rgba(0, 0, 0, 0.05);
+  --primary-bg: #fafbfc;
+  --secondary-bg: #ffffff;
+  --card-bg: #ffffff;
+  --border-color: #e5e7eb;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --accent-blue: #0ea5e9;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-orange: #f59e0b;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  font-family: "Inter", Arial, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
   margin: 0;
   padding: 0;
-  width: 340px; /* Levemente mais largo para mais espaço */
-  background-color: var(--arc-background-light);
-  color: var(--arc-text-primary);
+  width: 420px; /* Expandido de 380px para 420px */
+  max-height: 600px; /* Altura máxima maior */
+  background: linear-gradient(135deg, var(--primary-bg) 0%, #f3f4f6 100%);
+  color: var(--text-primary);
   font-size: 14px;
-  line-height: 1.5; /* Melhorar legibilidade */
+  line-height: 1.5;
+  overflow-x: hidden;
 }
 
 .container {
-  padding: 20px; /* Mais padding geral */
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Header com logo */
+.header {
+  background: linear-gradient(135deg, var(--accent-blue) 0%, #0284c7 100%);
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  opacity: 0.3;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .title-heading {
-  font-size: 1.6em; /* Título maior */
-  font-weight: 700; /* Mais negrito */
-  color: var(--arc-blue);
-  margin-bottom: 25px;
-  text-align: center;
-  letter-spacing: -0.02em; /* Um toque de estilo */
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
 }
 
+/* Seções principais */
 .section-card {
-  background-color: var(--arc-card-background);
-  border-radius: 12px; /* Mais arredondado, estilo Arc */
-  box-shadow: 0 4px 15px var(--arc-shadow); /* Sombra mais suave */
-  padding: 20px;
-  margin-bottom: 25px;
-  border: 1px solid var(--arc-background-medium); /* Borda sutil */
+  background: var(--card-bg);
+  margin: 16px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.section-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
 .section-heading {
-  font-size: 1.2em;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: var(--arc-text-primary);
-  margin-top: 0;
-  margin-bottom: 15px;
-  display: flex; /* Para alinhar título e botão de refresh */
+  color: var(--text-primary);
+  margin: 0;
+  padding: 20px 20px 0;
+  display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .divider {
   height: 1px;
-  background-color: var(--arc-border-color);
-  margin: 30px 0; /* Mais espaço para o divisor */
-  opacity: 0.7;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--border-color),
+    transparent
+  );
+  margin: 20px 0;
 }
 
-/* Estilos para as listas de organizações */
+/* Lista de organizações */
 .org-list {
-  max-height: 250px; /* Mais altura */
+  max-height: 320px; /* Aumentado de 280px */
   overflow-y: auto;
-  border: none; /* Remover borda interna, já está no section-card */
-  border-radius: 0;
-  padding: 0;
-  background-color: transparent; /* Fundo transparente */
-  margin-bottom: 0; /* Gerenciado pelo section-card */
-  box-shadow: none; /* Remover sombra interna */
+  padding: 0 20px 20px;
+}
+
+.org-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.org-list::-webkit-scrollbar-track {
+  background: var(--primary-bg);
+  border-radius: 3px;
+}
+
+.org-list::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+
+.org-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }
 
 .org-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0; /* Mais padding */
-  border-bottom: 1px solid var(--arc-background-medium); /* Linhas mais claras */
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
 }
 
 .org-item:last-child {
   border-bottom: none;
 }
 
-.org-info {
-  flex-grow: 1;
-  margin-right: 15px;
+.org-item:hover {
+  background: var(--primary-bg);
+  margin: 0 -20px;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
 }
 
-.org-info span {
-  display: block;
+.org-info {
+  flex-grow: 1;
+  margin-right: 12px;
 }
 
 .org-info .alias {
   font-weight: 600;
-  color: var(--arc-blue); /* Alias em azul */
-  font-size: 1.05em;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .org-info .username {
-  /* Novo estilo para username em Orgs CLI */
-  font-size: 0.9em;
-  color: var(--arc-text-secondary);
-  margin-top: 2px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
 }
 
 .org-info .url {
-  color: var(--arc-text-secondary);
-  font-size: 0.8em;
+  color: var(--text-muted);
+  font-size: 0.8rem;
   word-break: break-all;
-  margin-top: 2px;
 }
 
-/* Destaque para Org Padrão do CLI */
+/* Org padrão */
 .default-org-highlight .alias {
-  color: var(--arc-green); /* Alias verde para org padrão */
+  color: var(--accent-green);
 }
+
+.default-org-highlight {
+  position: relative;
+}
+
 .default-org-highlight::after {
-  content: " (Padrão)";
-  font-size: 0.7em;
-  font-weight: normal;
-  color: var(--arc-text-secondary);
-}
-
-.org-actions button {
-  background-color: var(--arc-blue);
+  content: "Padrão";
+  position: absolute;
+  top: -8px;
+  right: 0;
+  background: var(--accent-green);
   color: white;
-  border: none;
-  padding: 8px 15px; /* Mais padding nos botões */
-  border-radius: 6px; /* Mais arredondado */
-  cursor: pointer;
-  font-size: 0.85em;
-  margin-left: 8px;
-  transition: all 0.2s ease;
-}
-
-.org-actions .delete-btn {
-  background-color: var(--arc-red);
-  font-size: 1.2em; /* 'x' maior */
-  padding: 6px 10px; /* Mais compacto para 'x' */
-  line-height: 1; /* Alinha o 'x' */
-}
-
-.org-actions button:hover {
-  filter: brightness(1.1); /* Efeito de brilho no hover */
-}
-.org-actions .delete-btn:hover {
-  filter: brightness(1.1);
-}
-
-/* Estilos para campos de entrada e botão de adicionar */
-.manual-org-form input[type="text"] {
-  width: calc(100% - 20px); /* Ajuste de padding */
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid var(--arc-border-color);
-  border-radius: 8px; /* Mais arredondado */
-  box-sizing: border-box;
-  font-size: 1em;
-  background-color: var(--arc-card-background);
-  color: var(--arc-text-primary);
-}
-
-.manual-org-form input[type="text"]::placeholder {
-  color: var(--arc-text-secondary);
-  opacity: 0.7;
-}
-
-.add-button {
-  /* Botão de adicionar org manual */
-  background-color: var(--arc-green) !important;
-  color: white;
-  border: none;
-  padding: 12px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  width: 100%;
-  font-size: 1em;
-  font-weight: bold;
-  transition: all 0.2s ease;
-}
-
-.add-button:hover {
-  filter: brightness(1.1);
-}
-
-/* Mensagens de estado */
-.message {
-  text-align: center;
-  color: var(--arc-text-secondary);
-  font-style: italic;
-  padding: 15px;
-}
-
-.loading-message {
-  color: var(--arc-blue);
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
   font-weight: 500;
 }
 
-/* Botão de refresh para a lista do CLI */
-.refresh-btn {
-  background-color: var(
-    --arc-text-secondary
-  ) !important; /* Cinza para refresh */
+/* Botões */
+.org-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.org-actions button {
+  background: var(--accent-blue);
   color: white;
   border: none;
-  padding: 8px 15px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 0.9em;
-  font-weight: normal; /* Menos bold que botões primários */
+  font-size: 0.85rem;
+  font-weight: 500;
   transition: all 0.2s ease;
-  align-self: flex-start; /* Alinha com o topo do título */
-  width: auto; /* Permite o botão ter seu próprio tamanho */
+  box-shadow: var(--shadow-sm);
+}
+
+.org-actions button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.org-actions .delete-btn {
+  background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.org-actions .open-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--accent-blue) 0%, #0284c7 100%);
+}
+
+/* Formulário manual */
+.manual-org-form {
+  padding: 24px;
+  background: var(--primary-bg);
+  border-top: 1px solid var(--border-color);
+}
+
+.manual-org-form input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  background: white;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.manual-org-form input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.manual-org-form input[type="text"]::placeholder {
+  color: var(--text-muted);
+}
+
+.add-button {
+  background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  width: 100%;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-button::before {
+  content: "➕";
+  font-size: 1rem;
+}
+
+.add-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Botão refresh */
+.refresh-btn {
+  background: var(--text-secondary);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(
+    135deg,
+    var(--text-secondary) 0%,
+    var(--text-primary) 100%
+  );
 }
 
 .refresh-btn:hover {
-  filter: brightness(1.1);
+  background: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
-/* Esconder scrollbar, estilo Arc */
-/* Works for Firefox */
-html {
-  scrollbar-width: none;
+/* Mensagens */
+.message {
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 20px;
+  background: var(--primary-bg);
+  border-radius: var(--radius-md);
+  margin: 12px 0;
 }
-/* Works for Chrome, Edge, and Safari */
-body::-webkit-scrollbar {
-  display: none;
+
+.loading-message {
+  color: var(--accent-blue);
+  font-weight: 500;
+  background: linear-gradient(
+    135deg,
+    rgba(14, 165, 233, 0.1) 0%,
+    rgba(14, 165, 233, 0.05) 100%
+  );
+  border: 1px solid rgba(14, 165, 233, 0.2);
 }
-#org-list::-webkit-scrollbar,
-#cli-org-list::-webkit-scrollbar {
+
+/* Animações */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.org-item {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Animação de loading */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.refresh-btn.loading svg {
+  animation: spin 1s linear infinite;
+}
+
+/* Estados dos botões */
+.org-actions button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.org-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Melhorias de acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-bg: #111827;
+    --secondary-bg: #1f2937;
+    --card-bg: #1f2937;
+    --border-color: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  }
+
+  .manual-org-form input[type="text"] {
+    background: var(--secondary-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+}
+
+/* ==========================================
+   RODAPÉ E SISTEMA DE DOAÇÕES
+   ========================================== */
+
+.footer {
+  background: linear-gradient(135deg, #f8fafc 0%, var(--secondary-bg) 100%);
+  border-top: 1px solid var(--border-color);
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Seção de apoio */
+.support-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.support-section:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.support-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.support-text {
+  flex-grow: 1;
+  line-height: 1.3;
+}
+
+.support-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 2px 0;
+  font-size: 0.9rem;
+}
+
+.support-subtitle {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.donate-btn {
+  background: linear-gradient(135deg, var(--accent-orange) 0%, #ea580c 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.donate-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.05);
+}
+
+.donate-btn:active {
+  transform: translateY(0);
+}
+
+/* Informações do desenvolvedor */
+.developer-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 8px;
+}
+
+.developer-link {
+  color: var(--accent-blue);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.developer-link:hover {
+  color: var(--text-primary);
+}
+
+/* ==========================================
+   MODAL DE DOAÇÃO
+   ========================================== */
+
+.donation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
   display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.donation-modal.active {
+  display: flex;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--card-bg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1001;
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: var(--primary-bg);
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+/* Seção PIX */
+.pix-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.pix-icon {
+  font-size: 2rem;
+}
+
+.qr-code {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: var(--primary-bg);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border-color);
+}
+
+.qr-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.qr-placeholder svg {
+  opacity: 0.5;
+}
+
+.qr-placeholder p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+/* Chave PIX */
+.pix-key {
+  width: 100%;
+}
+
+.pix-key label {
+  display: block;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.pix-key-input {
+  display: flex;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.pix-key-input:focus-within {
+  border-color: var(--accent-blue);
+}
+
+.pix-key-input input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: "Inter", monospace;
+}
+
+.pix-key-input input:focus {
+  outline: none;
+}
+
+.copy-btn {
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-btn:hover {
+  background: #0284c7;
+}
+
+.copy-btn:active {
+  transform: scale(0.95);
+}
+
+/* Valores sugeridos */
+.suggested-amounts {
+  width: 100%;
+  text-align: center;
+}
+
+.suggested-amounts p {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.amount-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.amount-btn {
+  background: var(--primary-bg);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.amount-btn:hover {
+  background: var(--accent-green);
+  color: white;
+  border-color: var(--accent-green);
+  transform: translateY(-1px);
+}
+
+.amount-btn:active {
+  transform: translateY(0);
+}
+
+/* Agradecimento */
+.thank-you {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1) 0%,
+    rgba(16, 185, 129, 0.05) 100%
+  );
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+}
+
+.thank-you p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* ==========================================
+   MELHORIAS RESPONSIVAS
+   ========================================== */
+
+/* Lista de orgs mais alta */
+.org-list {
+  max-height: 320px; /* Aumentado de 280px */
+  overflow-y: auto;
+  padding: 0 20px 20px;
+}
+
+/* Seções com mais espaçamento */
+.section-card {
+  margin: 20px 16px; /* Aumentado o espaçamento lateral */
+  padding: 24px; /* Aumentado o padding interno */
+}
+
+/* Container do manual org form expandido */
+.manual-org-form {
+  padding: 24px;
+  background: var(--primary-bg);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Responsive para telas menores */
+@media (max-width: 450px) {
+  body {
+    width: 100vw;
+    max-width: 420px;
+  }
+
+  .amount-buttons {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 0 10px;
+  }
 }

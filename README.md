@@ -29,11 +29,16 @@ _Uma visão geral da interface do pop-up da extensão._
 
 ### ✨ Principais Funcionalidades
 
-- **Login Rápido via CLI**: Acesse suas orgs Salesforce autorizadas no CLI com um clique, sem redigitar credenciais.
-- **Gerenciamento de Orgs Manuais**: Adicione e gerencie URLs de login personalizadas para orgs que não estão no seu CLI.
-- **Interface Intuitiva (Arc-like)**: Design minimalista, focado na clareza e facilidade de uso, alinhado à estética do navegador Arc.
-- **Suporte Multi-idioma (i18n)**: Disponível em Português e Inglês para uma experiência global.
-- **Base Robusta**: Construído com Manifest V3, Node.js para o servidor local e APIs de extensão do Chrome.
+- **🎨 Interface Moderna e Elegante**: Design completamente renovado com gradientes, sombras suaves e animações fluidas
+- **🚀 Login Rápido via CLI**: Acesse suas orgs Salesforce autorizadas no CLI com um clique, sem redigitar credenciais
+- **📱 Logo Integrada**: Logo do projeto exibida elegantemente no header da extensão
+- **⚡ Identificação Visual de Orgs**: Orgs padrão destacadas com ícones especiais e badges "Padrão"
+- **🔄 Feedback Visual em Tempo Real**: Animações de loading e estados visuais durante as operações
+- **🎯 Botões com Ícones SVG**: Interface mais intuitiva com ícones vetoriais personalizados
+- **📝 Gerenciamento de Orgs Manuais**: Adicione e gerencie URLs de login personalizadas para orgs que não estão no seu CLI
+- **🌐 Interface Responsiva**: Design adaptativo com suporte a tema escuro automático
+- **🌍 Suporte Multi-idioma (i18n)**: Disponível em Português e Inglês para uma experiência global
+- **⚙️ Base Robusta**: Construído com Manifest V3, Node.js para o servidor local e APIs de extensão do Chrome
 
 ---
 
@@ -47,6 +52,41 @@ Este projeto foi construído com as seguintes tecnologias:
 - **Express & CORS**: Framework web e middleware para o servidor local.
 - **Salesforce CLI**: Ferramenta de linha de comando para interagir com orgs Salesforce.
 - **Chrome Extension APIs**: Para gerenciar o navegador, armazenamento local e comunicação.
+
+---
+
+## 🎨 Melhorias de UI/UX Implementadas
+
+### Design Visual Moderno
+
+- **Header Gradiente**: Fundo gradiente azul com padrão de grid sutil e logo integrada
+- **Tipografia Inter**: Fonte moderna do Google Fonts para melhor legibilidade
+- **Paleta de Cores Consistente**: Cores inspiradas no Arc Browser e Salesforce Lightning
+- **Sombras e Elevação**: Cards com sombras suaves para criar hierarquia visual
+- **Border Radius Consistente**: Cantos arredondados em diferentes tamanhos para harmonia
+
+### Experiência Interativa
+
+- **Ícones SVG Personalizados**: Botões com ícones vetoriais para melhor usabilidade
+- **Estados de Hover/Active**: Feedback visual imediato em todas as interações
+- **Animações Fluidas**: Transições suaves de 0.2s para mudanças de estado
+- **Loading States**: Indicadores visuais com animação de rotação durante carregamento
+- **Scroll Customizado**: Barra de rolagem estilizada para listas longas
+
+### Organização e Layout
+
+- **Cards Organizados**: Separação clara entre Orgs CLI e Orgs Manuais
+- **Destaque para Org Padrão**: Badge "Padrão" e ícone ⚡ para orgs principais
+- **Espaçamento Consistente**: Padding e margin harmoniosos em toda a interface
+- **Responsividade**: Adaptação automática para diferentes tamanhos de janela
+- **Acessibilidade**: Suporte a `prefers-reduced-motion` e tema escuro
+
+### Feedback e Status
+
+- **Mensagens Contextuais**: Feedback claro para estados vazios e erros
+- **Estados de Botões**: Loading, disabled e hover claramente diferenciados
+- **Cores Semânticas**: Verde para sucesso, azul para ações, vermelho para exclusão
+- **Indicadores Visuais**: Ícones específicos para diferentes tipos de org (⚡🏢)
 
 ---
 
@@ -115,4 +155,3 @@ Este projeto é um exemplo do meu trabalho e aprendizado contínuo em desenvolvi
 - **GitHub**: [victorbrandaao](https://github.com/victorbrandaao)
 
 ---
-
