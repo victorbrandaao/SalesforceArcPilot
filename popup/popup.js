@@ -36,6 +36,36 @@ document.addEventListener("DOMContentLoaded", () => {
   loadAnalytics();
   loadManualOrgs();
   loadCliOrgs();
+  initializeBackgroundCommunication();
+
+  // === BACKGROUND SERVICE WORKER INTEGRATION ===
+  function initializeBackgroundCommunication() {
+    // Send analytics update to background
+    chrome.runtime.sendMessage({
+      action: "updateAnalytics",
+      type: "popup_open",
+    });
+
+    // Get system theme preference
+    chrome.runtime.sendMessage(
+      {
+        action: "getSystemTheme",
+      },
+      (response) => {
+        if (response && response.isDark) {
+          document.body.classList.add("dark-theme");
+        }
+      }
+    );
+  }
+
+  function sendNotification(title, message) {
+    chrome.runtime.sendMessage({
+      action: "showNotification",
+      title: title,
+      message: message,
+    });
+  }
 
   // === UTILITY FUNCTIONS ===
 
@@ -592,6 +622,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function openOrgManually(url, alias) {
     chrome.tabs.create({ url: url });
     trackOrgOpen("manual", alias);
+
+    // Send analytics to background
+    chrome.runtime.sendMessage({
+      action: "updateAnalytics",
+      type: "manual",
+    });
+
+    // Send notification
+    sendNotification("Org Aberta", `${alias} foi aberta com sucesso`);
+
     showToast(`Abrindo ${alias}...`, "success", 2000);
     window.close();
   }
@@ -638,6 +678,16 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Resposta do servidor local:", data);
         if (data.success) {
           trackOrgOpen("cli", alias);
+
+          // Send analytics to background
+          chrome.runtime.sendMessage({
+            action: "updateAnalytics",
+            type: "cli",
+          });
+
+          // Send notification
+          sendNotification("Org CLI Aberta", `${alias} foi aberta via CLI`);
+
           showToast(
             chrome.i18n.getMessage("orgOpenSuccess", [alias]),
             "success"
