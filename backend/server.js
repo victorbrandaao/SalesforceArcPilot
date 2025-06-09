@@ -216,7 +216,7 @@ app.get("/api/stats", (req, res) => {
           source: s.source,
         })),
         downloads: downloads.slice(-5),
-        topEvents: this.getTopEvents(),
+        topEvents: getTopEvents(),
       },
     });
   } catch (error) {
