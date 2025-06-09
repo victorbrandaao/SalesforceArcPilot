@@ -109,6 +109,64 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   return true; // Keep message channel open for async response
 });
 
+// Handle subscription-related messages
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  switch (message.type) {
+    case "GET_SUBSCRIPTION":
+      if (window.subscriptionManager) {
+        sendResponse(window.subscriptionManager.getSubscriptionInfo());
+      } else {
+        sendResponse({ plan: "free", features: { maxOrgs: 2 } });
+      }
+      break;
+
+    case "UPGRADE_SUBSCRIPTION":
+      if (window.subscriptionManager) {
+        window.subscriptionManager
+          .upgradeSubscription(message.plan, message.paymentData)
+          .then((result) => sendResponse(result));
+        return true; // Keep message channel open for async response
+      }
+      break;
+
+    case "CANCEL_SUBSCRIPTION":
+      if (window.subscriptionManager) {
+        window.subscriptionManager.cancelSubscription().then((result) => sendResponse(result));
+        return true;
+      }
+      break;
+
+    case "CHECK_ORG_LIMIT":
+      if (window.subscriptionManager) {
+        chrome.storage.sync.get(["orgs"], (data) => {
+          const orgs = data.orgs || [];
+          const canAdd = window.subscriptionManager.canAddOrg(orgs.length);
+          sendResponse({ canAdd, currentCount: orgs.length });
+        });
+        return true;
+      }
+      break;
+
+    case "TRACK_ORG_ACCESS":
+      // Send usage analytics to backend
+      if (window.subscriptionManager && window.subscriptionManager.hasFeature("analytics")) {
+        fetch(`${window.subscriptionManager.API_BASE_URL}/analytics/org-access`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(message),
+        }).catch(console.error);
+      }
+      break;
+  }
+});
+
+// Check for expired subscriptions on startup
+chrome.runtime.onStartup.addListener(() => {
+  if (window.subscriptionManager) {
+    window.subscriptionManager.handleExpiredSubscription();
+  }
+});
+
 // Handle tab updates to detect Salesforce pages
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {

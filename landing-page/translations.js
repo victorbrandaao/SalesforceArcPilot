@@ -65,12 +65,12 @@ window.translations = {
         title: "Grátis",
         period: "/sempre",
         features: {
-          orgs: "Até 5 orgs",
-          search: "Busca básica",
+          orgs: "Até 2 orgs",
+          search: "Busca básica", 
           theme: "Tema claro",
-          support: "Suporte por email",
+          support: "Suporte por email"
         },
-        button: "Começar Grátis",
+        button: "Começar Grátis"
       },
       premium: {
         title: "Premium",
@@ -261,12 +261,12 @@ window.translations = {
         title: "Free",
         period: "/forever",
         features: {
-          orgs: "Up to 5 orgs",
+          orgs: "Up to 2 orgs",
           search: "Basic search",
           theme: "Light theme",
-          support: "Email support",
+          support: "Email support"
         },
-        button: "Start Free",
+        button: "Start Free"
       },
       premium: {
         title: "Premium",
