@@ -1,0 +1,117 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g., 1.0.0)"
+        required: true
+        default: "1.0.0"
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build releases
+        run: |
+          chmod +x scripts/build-release.sh
+          VERSION=${{ steps.get_version.outputs.VERSION }} scripts/build-release.sh
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          release_name: Salesforce Arc Pilot v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## 🚀 Salesforce Arc Pilot v${{ steps.get_version.outputs.VERSION }}
+
+            ### 📥 Downloads
+
+            - **🆓 Plano Grátis:** `salesforce-arc-pilot-free-v${{ steps.get_version.outputs.VERSION }}.zip`
+            - **💎 Plano Premium:** `salesforce-arc-pilot-premium-v${{ steps.get_version.outputs.VERSION }}.zip`
+
+            ### 📖 Instalação
+
+            1. Baixe o arquivo ZIP apropriado
+            2. Extraia em uma pasta
+            3. Abra Chrome > `chrome://extensions/`
+            4. Ative "Modo do desenvolvedor"
+            5. Clique "Carregar sem compactação"
+            6. Selecione a pasta extraída
+
+            ### ✨ Recursos
+
+            #### 🆓 Plano Grátis
+            - Até 2 orgs Salesforce
+            - Busca básica
+            - Interface moderna
+
+            #### 💎 Plano Premium
+            - Orgs ilimitadas
+            - Analytics dashboard
+            - Dark mode + temas
+            - Sync na nuvem
+            - Backup automático
+
+            ### 🔗 Links
+
+            - 🌐 [Landing Page](https://victorbrandaao.github.io/salesforce-arc-pilot-landing)
+            - 💳 [Fazer Upgrade](https://victorbrandaao.github.io/salesforce-arc-pilot-landing/#pricing)
+            - 📧 [Suporte](mailto:support@salesforcearcpilot.com)
+
+          draft: false
+          prerelease: false
+
+      - name: Upload Free Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./releases/v${{ steps.get_version.outputs.VERSION }}/salesforce-arc-pilot-free-v${{ steps.get_version.outputs.VERSION }}.zip
+          asset_name: salesforce-arc-pilot-free-v${{ steps.get_version.outputs.VERSION }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload Premium Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./releases/v${{ steps.get_version.outputs.VERSION }}/salesforce-arc-pilot-premium-v${{ steps.get_version.outputs.VERSION }}.zip
+          asset_name: salesforce-arc-pilot-premium-v${{ steps.get_version.outputs.VERSION }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload Release Manifest
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./releases/v${{ steps.get_version.outputs.VERSION }}/releases.json
+          asset_name: releases.json
+          asset_content_type: application/json

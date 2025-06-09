@@ -81,6 +81,99 @@ app.post("/api/subscribe", (req, res) => {
   }
 });
 
+// Enhanced download tracking with GitHub releases integration
+app.post("/api/download-link", (req, res) => {
+  try {
+    const { type } = req.body;
+    const userAgent = req.headers["user-agent"];
+    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+
+    // Track download
+    const downloadRecord = {
+      type: type || "free",
+      timestamp: new Date().toISOString(),
+      userAgent: userAgent?.substring(0, 100),
+      ip: ip?.split(",")[0],
+      id: Date.now(),
+    };
+
+    downloads.push(downloadRecord);
+
+    console.log(`⬇️ Download tracked: ${type} (Total: ${downloads.length})`);
+
+    // GitHub releases URLs (update with actual release URLs)
+    const downloadUrls = {
+      free: "https://github.com/victorbrandao-tech/SalesforceArcPilot/releases/download/v1.0.0/salesforce-arc-pilot-free-v1.0.0.zip",
+      premium:
+        "https://github.com/victorbrandao-tech/SalesforceArcPilot/releases/download/v1.0.0/salesforce-arc-pilot-premium-v1.0.0.zip",
+    };
+
+    res.json({
+      success: true,
+      downloadUrl: downloadUrls[type] || downloadUrls.free,
+      totalDownloads: downloads.length,
+      message: "Link de download gerado com sucesso!",
+      instructions: {
+        pt: {
+          steps: [
+            "1. Baixe o arquivo ZIP",
+            "2. Extraia em uma pasta",
+            "3. Abra Chrome > chrome://extensions/",
+            '4. Ative "Modo do desenvolvedor"',
+            '5. Clique "Carregar sem compactação"',
+            "6. Selecione a pasta extraída",
+          ],
+          videoGuide:
+            "https://victorbrandaao.github.io/salesforce-arc-pilot-landing/how-to-install",
+        },
+        en: {
+          steps: [
+            "1. Download the ZIP file",
+            "2. Extract to a folder",
+            "3. Open Chrome > chrome://extensions/",
+            '4. Enable "Developer mode"',
+            '5. Click "Load unpacked"',
+            "6. Select the extracted folder",
+          ],
+          videoGuide:
+            "https://victorbrandaao.github.io/salesforce-arc-pilot-landing/how-to-install",
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Download error:", error);
+    res.status(500).json({ error: "Erro ao gerar link de download" });
+  }
+});
+
+// Get latest release info
+app.get("/api/latest-release", async (req, res) => {
+  try {
+    // In a real implementation, you'd fetch from GitHub API
+    const latestRelease = {
+      version: "1.0.0",
+      releaseDate: "2024-06-09",
+      downloads: {
+        free: "https://github.com/victorbrandao-tech/SalesforceArcPilot/releases/download/v1.0.0/salesforce-arc-pilot-free-v1.0.0.zip",
+        premium:
+          "https://github.com/victorbrandao-tech/SalesforceArcPilot/releases/download/v1.0.0/salesforce-arc-pilot-premium-v1.0.0.zip",
+      },
+      changelog: [
+        "🎉 Initial release",
+        "✨ Support for up to 2 orgs (free) / unlimited (premium)",
+        "🔍 Smart org search",
+        "🎨 Modern interface",
+        "💎 Premium features: Analytics, Dark Mode, Cloud Sync",
+      ],
+    };
+
+    res.json(latestRelease);
+  } catch (error) {
+    console.error("Latest release error:", error);
+    res.status(500).json({ error: "Erro ao buscar versão mais recente" });
+  }
+});
+
 // Download tracking (free)
 app.post("/api/download-link", (req, res) => {
   try {
