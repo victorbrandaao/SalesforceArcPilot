@@ -979,7 +979,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
     });
-  }
 
   // Initialize PIX system
   initializePIXDonation();
@@ -998,7 +997,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Escape to close modals
     if (e.key === "Escape") {
       // Close settings modal
-      const settingsModal = document.getElementById("settings-modal");
       if (settingsModal && settingsModal.style.display === "flex") {
         settingsModal.style.display = "none";
       }
@@ -1015,4 +1013,4 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize the extension
   updateStatus("loading");
   checkServerHealth();
-}); // Fecha o DOMContentLoaded
+});

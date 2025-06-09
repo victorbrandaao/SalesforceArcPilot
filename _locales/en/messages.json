@@ -4,23 +4,37 @@
     "message": "🚀 Premium Salesforce org manager with modern UI, real-time search, smart filters, analytics, and advanced CLI integration for productivity."
   },
   "mainTitle": { "message": "Salesforce Organizations" },
-  "noOrgsAdded": { "message": "No manually added organizations yet. Add your first org below!" },
+  "noOrgsAdded": {
+    "message": "No manually added organizations yet. Add your first org below!"
+  },
   "addOrgSectionTitle": { "message": "Manual Organization Setup" },
-  "orgAliasPlaceholder": { "message": "Organization Alias (e.g., Production, Dev Sandbox)" },
-  "orgUrlPlaceholder": { "message": "Login URL (e.g., mycompany.my.salesforce.com)" },
+  "orgAliasPlaceholder": {
+    "message": "Organization Alias (e.g., Production, Dev Sandbox)"
+  },
+  "orgUrlPlaceholder": {
+    "message": "Login URL (e.g., mycompany.my.salesforce.com)"
+  },
   "addOrgButton": { "message": "✨ Add Organization" },
   "openButton": { "message": "Open" },
   "deleteButton": { "message": "Delete" },
-  "fillFieldsAlert": { "message": "Please fill in both Organization Alias and URL fields." },
-  "confirmDelete": { "message": "Are you sure you want to delete this organization? This action cannot be undone." },
+  "fillFieldsAlert": {
+    "message": "Please fill in both Organization Alias and URL fields."
+  },
+  "confirmDelete": {
+    "message": "Are you sure you want to delete this organization? This action cannot be undone."
+  },
   "cliOrgsSectionTitle": { "message": "CLI Authorized Organizations" },
   "noCliOrgsAvailable": {
     "message": "No CLI organizations found. Please ensure Salesforce CLI is installed and organizations are properly authorized."
   },
   "refreshCliOrgsButton": { "message": "🔄 Refresh CLI List" },
   "loadingCliOrgs": { "message": "Loading CLI organizations..." },
-  "orgOpenSuccess": { "message": "Organization '{0}' opened successfully via CLI!" },
-  "orgOpenError": { "message": "Failed to open organization '{0}' via CLI: {1}" },
+  "orgOpenSuccess": {
+    "message": "Organization '{0}' opened successfully via CLI!"
+  },
+  "orgOpenError": {
+    "message": "Failed to open organization '{0}' via CLI: {1}"
+  },
   "serverCommunicationError": {
     "message": "Communication error with local server: {0}. Please check if the server is running."
   },
@@ -48,16 +62,26 @@
   "copyUrlError": { "message": "❌ Error copying URL to clipboard" },
   "addedToFavorites": { "message": "⭐ Organization added to favorites" },
   "removedFromFavorites": { "message": "Organization removed from favorites" },
-  "orgAddedSuccess": { "message": "🎉 Organization \"{0}\" added successfully!" },
+  "orgAddedSuccess": {
+    "message": "🎉 Organization \"{0}\" added successfully!"
+  },
   "donationSectionTitle": { "message": "💝 Support the Project" },
-  "donationDescription": { "message": "If this extension is helping you, consider making a donation to support development!" },
+  "donationDescription": {
+    "message": "If this extension is helping you, consider making a donation to support development!"
+  },
   "pixKeyLabel": { "message": "PIX Key (CPF):" },
   "copyPixKey": { "message": "Copy PIX Key" },
   "pixKeyCopied": { "message": "💚 PIX key copied!" },
   "suggestedAmounts": { "message": "Suggested amounts:" },
-  "donationThankYou": { "message": "💚 Thank you for supporting this extension!" },
-  "donationMessage": { "message": "Every contribution helps keep the project active and improve it even more." },
-  "timeoutError": { "message": "⏱️ Operation timeout - command took too long to execute" },
+  "donationThankYou": {
+    "message": "💚 Thank you for supporting this extension!"
+  },
+  "donationMessage": {
+    "message": "Every contribution helps keep the project active and improve it even more."
+  },
+  "timeoutError": {
+    "message": "⏱️ Operation timeout - command took too long to execute"
+  },
   "noOrgsFound": { "message": "ℹ️ No authorized organizations found" },
   "serverHealthy": { "message": "✅ Server is healthy and running" },
   "serverUnhealthy": { "message": "❌ Server is experiencing issues" },
@@ -79,7 +103,9 @@
   "realTimeSearch": { "message": "Real-time search across all organizations" },
   "smartFilters": { "message": "Smart filters for quick organization finding" },
   "favoriteSystem": { "message": "Favorites system with one-click access" },
-  "analyticsTracking": { "message": "Usage analytics and productivity insights" },
+  "analyticsTracking": {
+    "message": "Usage analytics and productivity insights"
+  },
   "modernUI": { "message": "Modern glassmorphism UI with dark mode support" },
   "orgRemovedSuccess": { "message": "Org \"{0}\" removed successfully!" },
   "duplicateOrgError": {
