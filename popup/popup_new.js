@@ -184,12 +184,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (noCliOrgsMessage)
       noCliOrgsMessage.textContent =
         chrome.i18n.getMessage("noCliOrgsAvailable");
-
-    // Setup refresh button with correct SVG handling
     if (refreshCliOrgsBtn) {
-      const refreshIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`;
-      const refreshText = chrome.i18n.getMessage("refreshCliOrgsButton");
-      refreshCliOrgsBtn.innerHTML = refreshIcon + " " + refreshText;
+      refreshCliOrgsBtn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        ${chrome.i18n.getMessage("refreshCliOrgsButton")}
+      `;
     }
 
     document.getElementById("add-org-section-title").textContent =
@@ -293,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
       button.addEventListener("click", () => {
         const amount = button.dataset.amount;
         showToast(
-          "Valor sugerido: R$ " + amount + " - Use a chave PIX acima!",
+          `Valor sugerido: R$ ${amount} - Use a chave PIX acima!`,
           "info",
           5000
         );
@@ -396,7 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         orgs.push({
           alias,
-          url: url.startsWith("https://") ? url : "https://" + url,
+          url: url.startsWith("https://") ? url : `https://${url}`,
           createdAt: new Date().toISOString(),
           isFavorite: false,
         });
@@ -405,7 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
           orgAliasInput.value = "";
           orgUrlInput.value = "";
           loadManualOrgs();
-          showToast('Org "' + alias + '" adicionada com sucesso!', "success");
+          showToast(`Org "${alias}" adicionada com sucesso!`, "success");
         });
       });
     }
@@ -432,21 +435,6 @@ document.addEventListener("DOMContentLoaded", () => {
           const favoriteClass = org.isFavorite ? "active" : "";
           const favoriteIcon = org.isFavorite ? "★" : "☆";
 
-          const createdAtText = org.createdAt
-            ? '<span class="org-meta">Adicionada em ' +
-              new Date(org.createdAt).toLocaleDateString("pt-BR") +
-              "</span>"
-            : "";
-
-          const copyIcon =
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-
-          const openIcon =
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>';
-
-          const deleteIcon =
-            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
-
           orgItem.innerHTML = `
             <div class="org-info">
               <div class="org-header">
@@ -456,22 +444,36 @@ document.addEventListener("DOMContentLoaded", () => {
                 </button>
               </div>
               <span class="url">${org.url}</span>
-              ${createdAtText}
+              ${
+                org.createdAt
+                  ? `<span class="org-meta">Adicionada em ${new Date(
+                      org.createdAt
+                    ).toLocaleDateString("pt-BR")}</span>`
+                  : ""
+              }
             </div>
             <div class="org-actions">
               <button data-action="copy-url" data-url="${
                 org.url
               }" class="action-btn" title="Copiar URL">
-                ${copyIcon}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
               </button>
               <button data-action="open-manual" data-url="${
                 org.url
               }" data-alias="${org.alias}" class="open-btn primary">
-                ${openIcon}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
                 ${chrome.i18n.getMessage("openButton")}
               </button>
               <button data-action="delete-manual" data-index="${index}" class="delete-btn" title="Excluir">
-                ${deleteIcon}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
           `;
@@ -574,12 +576,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? '<span class="org-badge default">Default</span>'
                 : "";
 
-              const copyIcon =
-                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-
-              const openIcon =
-                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>';
-
               orgItem.innerHTML = `
                 <div class="org-info${defaultClass}">
                   <div class="org-header">
@@ -594,12 +590,17 @@ document.addEventListener("DOMContentLoaded", () => {
                   <button data-action="copy-url" data-url="${
                     org.instanceUrl
                   }" class="action-btn" title="Copiar URL">
-                    ${copyIcon}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
                   </button>
                   <button data-action="open-cli" data-alias="${
                     org.alias || org.username
                   }" class="open-btn primary">
-                    ${openIcon}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="m9 18 6-6-6-6"/>
+                    </svg>
                     ${chrome.i18n.getMessage("openButton")}
                   </button>
                 </div>
@@ -628,7 +629,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
           }
 
-          showToast(cliOrgs.length + " orgs CLI carregadas", "success", 2000);
+          showToast(`${cliOrgs.length} orgs CLI carregadas`, "success", 2000);
         } else {
           if (noCliOrgsMessage) {
             noCliOrgsMessage.style.display = "block";
@@ -686,6 +687,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const cliResponse = await fetch("http://localhost:3000/cli-info", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(15000),
       });
 
       const cliData = await cliResponse.json();
@@ -702,7 +704,10 @@ document.addEventListener("DOMContentLoaded", () => {
       updateStatus("error");
       console.error("Erro ao verificar saúde do servidor:", error);
 
-      if (error.message.includes("Failed to fetch")) {
+      if (
+        error.message.includes("Failed to fetch") ||
+        error.name === "AbortError"
+      ) {
         showToast("Servidor local não está rodando", "error");
       } else {
         showToast("Erro ao comunicar com servidor local", "error");
@@ -733,7 +738,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const action = orgs[index].isFavorite
               ? "adicionada aos"
               : "removida dos";
-            showToast("Org " + action + " favoritos", "success", 2000);
+            showToast(`Org ${action} favoritos`, "success", 2000);
           });
         }
       });
@@ -752,9 +757,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Send notification
-    sendNotification("Org Aberta", alias + " foi aberta com sucesso");
+    sendNotification("Org Aberta", `${alias} foi aberta com sucesso`);
 
-    showToast("Abrindo " + alias + "...", "success", 2000);
+    showToast(`Abrindo ${alias}...`, "success", 2000);
     window.close();
   }
 
@@ -767,7 +772,7 @@ document.addEventListener("DOMContentLoaded", () => {
         orgs.splice(index, 1);
         chrome.storage.sync.set({ salesforceOrgs: orgs }, () => {
           loadManualOrgs();
-          showToast('Org "' + orgAlias + '" removida', "success", 2000);
+          showToast(`Org "${orgAlias}" removida`, "success", 2000);
         });
       }
     });
@@ -777,7 +782,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const serverUrl = "http://localhost:3000/open-org";
 
     // Show loading toast
-    showToast("Abrindo " + alias + " via CLI...", "info", 2000);
+    showToast(`Abrindo ${alias} via CLI...`, "info", 2000);
 
     fetch(serverUrl, {
       method: "POST",
@@ -810,17 +815,13 @@ document.addEventListener("DOMContentLoaded", () => {
           // Send notification
           sendNotification(
             "Org Aberta via CLI",
-            alias + " foi aberta com sucesso"
+            `${alias} foi aberta com sucesso`
           );
 
-          showToast(alias + " aberta com sucesso!", "success", 3000);
+          showToast(`${alias} aberta com sucesso!`, "success", 3000);
           window.close();
         } else {
-          showToast(
-            "Erro ao abrir " + alias + ": " + data.message,
-            "error",
-            5000
-          );
+          showToast(`Erro ao abrir ${alias}: ${data.message}`, "error", 5000);
         }
       })
       .catch((error) => {
@@ -889,7 +890,7 @@ document.addEventListener("DOMContentLoaded", () => {
         button.classList.add("active");
 
         const amount = button.dataset.amount;
-        showToast("Valor sugerido: R$ " + amount, "info", 2000);
+        showToast(`Valor sugerido: R$ ${amount}`, "info", 2000);
 
         // Analytics tracking
         chrome.runtime.sendMessage({
@@ -971,7 +972,7 @@ document.addEventListener("DOMContentLoaded", () => {
         button.classList.add("active");
 
         const amount = button.dataset.amount;
-        showToast("Valor selecionado: R$ " + amount, "success", 2000);
+        showToast(`Valor selecionado: R$ ${amount}`, "success", 2000);
 
         // Analytics tracking
         chrome.runtime.sendMessage({

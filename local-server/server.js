@@ -84,19 +84,19 @@ app.get("/cli-info", (req, res) => {
 
   const cliCommand = "sf version --json";
 
-  // Adicionar timeout de 10 segundos para evitar travamento
+  // Aumentar timeout para 15 segundos para evitar travamento
   const timeout = setTimeout(() => {
-    console.error("CLI check timeout after 10 seconds");
+    console.error("CLI check timeout after 15 seconds");
     res.status(408).json({
       success: false,
       message:
-        "Timeout ao verificar CLI - operação demorou mais de 10 segundos",
+        "Timeout ao verificar CLI - operação demorou mais de 15 segundos",
       cliInstalled: false,
       timeout: true,
     });
-  }, 10000);
+  }, 15000);
 
-  exec(cliCommand, { timeout: 8000 }, (error, stdout, stderr) => {
+  exec(cliCommand, { timeout: 12000 }, (error, stdout, stderr) => {
     clearTimeout(timeout);
 
     if (error) {
