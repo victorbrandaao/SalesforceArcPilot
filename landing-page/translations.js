@@ -66,11 +66,11 @@ window.translations = {
         period: "/sempre",
         features: {
           orgs: "Até 2 orgs",
-          search: "Busca básica", 
+          search: "Busca básica",
           theme: "Tema claro",
-          support: "Suporte por email"
+          support: "Suporte por email",
         },
-        button: "Começar Grátis"
+        button: "Começar Grátis",
       },
       premium: {
         title: "Premium",
@@ -264,9 +264,9 @@ window.translations = {
           orgs: "Up to 2 orgs",
           search: "Basic search",
           theme: "Light theme",
-          support: "Email support"
+          support: "Email support",
         },
-        button: "Start Free"
+        button: "Start Free",
       },
       premium: {
         title: "Premium",

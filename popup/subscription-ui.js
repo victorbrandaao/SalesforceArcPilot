@@ -16,54 +16,60 @@ class SubscriptionUI {
 
   async getSubscriptionFromBackground() {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({ type: 'GET_SUBSCRIPTION' }, (response) => {
+      chrome.runtime.sendMessage({ type: "GET_SUBSCRIPTION" }, (response) => {
         resolve(response);
       });
     });
   }
 
   renderSubscriptionStatus() {
-    const container = document.getElementById('subscription-status');
+    const container = document.getElementById("subscription-status");
     if (!container) return;
 
-    const plan = this.currentSubscription?.plan || 'free';
+    const plan = this.currentSubscription?.plan || "free";
     const features = this.currentSubscription?.features || {};
 
     container.innerHTML = `
       <div class="subscription-card ${plan}">
         <div class="plan-header">
           <h3>${this.getPlanDisplayName(plan)}</h3>
-          ${plan === 'premium' ? '<span class="premium-badge">PREMIUM</span>' : ''}
+          ${
+            plan === "premium"
+              ? '<span class="premium-badge">PREMIUM</span>'
+              : ""
+          }
         </div>
         
         <div class="features-list">
-          <div class="feature ${features.maxOrgs > 2 ? 'enabled' : 'disabled'}">
+          <div class="feature ${features.maxOrgs > 2 ? "enabled" : "disabled"}">
             <i class="fas fa-database"></i>
-            <span>Orgs: ${features.maxOrgs || 2} ${features.maxOrgs > 100 ? '(ilimitadas)' : ''}</span>
+            <span>Orgs: ${features.maxOrgs || 2} ${
+      features.maxOrgs > 100 ? "(ilimitadas)" : ""
+    }</span>
           </div>
           
-          <div class="feature ${features.analytics ? 'enabled' : 'disabled'}">
+          <div class="feature ${features.analytics ? "enabled" : "disabled"}">
             <i class="fas fa-chart-bar"></i>
             <span>Analytics Dashboard</span>
-            ${!features.analytics ? '<i class="fas fa-lock"></i>' : ''}
+            ${!features.analytics ? '<i class="fas fa-lock"></i>' : ""}
           </div>
           
-          <div class="feature ${features.darkMode ? 'enabled' : 'disabled'}">
+          <div class="feature ${features.darkMode ? "enabled" : "disabled"}">
             <i class="fas fa-moon"></i>
             <span>Dark Mode + Temas</span>
-            ${!features.darkMode ? '<i class="fas fa-lock"></i>' : ''}
+            ${!features.darkMode ? '<i class="fas fa-lock"></i>' : ""}
           </div>
           
-          <div class="feature ${features.cloudSync ? 'enabled' : 'disabled'}">
+          <div class="feature ${features.cloudSync ? "enabled" : "disabled"}">
             <i class="fas fa-cloud"></i>
             <span>Sync na Nuvem</span>
-            ${!features.cloudSync ? '<i class="fas fa-lock"></i>' : ''}
+            ${!features.cloudSync ? '<i class="fas fa-lock"></i>' : ""}
           </div>
           
-          <div class="feature ${features.backup ? 'enabled' : 'disabled'}">
+          <div class="feature ${features.backup ? "enabled" : "disabled"}">
             <i class="fas fa-shield-alt"></i>
             <span>Backup Automático</span>
-            ${!features.backup ? '<i class="fas fa-lock"></i>' : ''}
+            ${!features.backup ? '<i class="fas fa-lock"></i>' : ""}
           </div>
         </div>
 
@@ -75,7 +81,7 @@ class SubscriptionUI {
   }
 
   renderActionButtons(plan) {
-    if (plan === 'free') {
+    if (plan === "free") {
       return `
         <button class="upgrade-btn premium" onclick="subscriptionUI.showUpgradeModal()">
           <i class="fas fa-rocket"></i>
@@ -85,7 +91,7 @@ class SubscriptionUI {
           Ver todos os planos
         </a>
       `;
-    } else if (plan === 'premium') {
+    } else if (plan === "premium") {
       return `
         <div class="premium-status">
           <i class="fas fa-check-circle"></i>
@@ -97,21 +103,21 @@ class SubscriptionUI {
         </button>
       `;
     }
-    return '';
+    return "";
   }
 
   getPlanDisplayName(plan) {
     const names = {
-      'free': 'Plano Grátis',
-      'premium': 'Premium',
-      'enterprise': 'Enterprise'
+      free: "Plano Grátis",
+      premium: "Premium",
+      enterprise: "Enterprise",
     };
-    return names[plan] || 'Desconhecido';
+    return names[plan] || "Desconhecido";
   }
 
   showUpgradeModal() {
-    const modal = document.createElement('div');
-    modal.className = 'upgrade-modal';
+    const modal = document.createElement("div");
+    modal.className = "upgrade-modal";
     modal.innerHTML = `
       <div class="modal-content">
         <div class="modal-header">
@@ -151,13 +157,13 @@ class SubscriptionUI {
         </div>
       </div>
     `;
-    
+
     document.body.appendChild(modal);
   }
 
   showManageModal() {
-    const modal = document.createElement('div');
-    modal.className = 'manage-modal';
+    const modal = document.createElement("div");
+    modal.className = "manage-modal";
     modal.innerHTML = `
       <div class="modal-content">
         <div class="modal-header">
@@ -192,30 +198,35 @@ class SubscriptionUI {
         </div>
       </div>
     `;
-    
+
     document.body.appendChild(modal);
   }
 
   redirectToPayment() {
-    const paymentUrl = 'https://victorbrandaao.github.io/salesforce-arc-pilot-landing/#pricing';
+    const paymentUrl =
+      "https://victorbrandaao.github.io/salesforce-arc-pilot-landing/#pricing";
     chrome.tabs.create({ url: paymentUrl });
   }
 
   openLandingPage() {
-    chrome.tabs.create({ 
-      url: 'https://victorbrandaao.github.io/salesforce-arc-pilot-landing' 
+    chrome.tabs.create({
+      url: "https://victorbrandaao.github.io/salesforce-arc-pilot-landing",
     });
   }
 
   async cancelSubscription() {
-    if (confirm('Tem certeza que deseja cancelar sua assinatura? Você manterá acesso aos recursos premium até o final do período pago.')) {
-      const result = await this.sendMessageToBackground('CANCEL_SUBSCRIPTION');
+    if (
+      confirm(
+        "Tem certeza que deseja cancelar sua assinatura? Você manterá acesso aos recursos premium até o final do período pago."
+      )
+    ) {
+      const result = await this.sendMessageToBackground("CANCEL_SUBSCRIPTION");
       if (result.success) {
-        alert('Assinatura cancelada com sucesso.');
+        alert("Assinatura cancelada com sucesso.");
         this.loadSubscriptionInfo();
         this.renderSubscriptionStatus();
       } else {
-        alert('Erro ao cancelar assinatura. Tente novamente.');
+        alert("Erro ao cancelar assinatura. Tente novamente.");
       }
     }
   }
@@ -229,13 +240,13 @@ class SubscriptionUI {
   getNextBillingDate() {
     const date = new Date();
     date.setMonth(date.getMonth() + 1);
-    return date.toLocaleDateString('pt-BR');
+    return date.toLocaleDateString("pt-BR");
   }
 
   bindEvents() {
     // Listen for subscription updates
     chrome.runtime.onMessage.addListener((message) => {
-      if (message.type === 'SUBSCRIPTION_UPDATED') {
+      if (message.type === "SUBSCRIPTION_UPDATED") {
         this.currentSubscription = message.subscription;
         this.renderSubscriptionStatus();
       }
@@ -244,8 +255,8 @@ class SubscriptionUI {
 }
 
 // Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
     window.subscriptionUI = new SubscriptionUI();
   });
 } else {

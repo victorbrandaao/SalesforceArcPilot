@@ -18,12 +18,12 @@ class OrgManager {
 
   async getSubscriptionFromBackground() {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({ type: 'GET_SUBSCRIPTION' }, resolve);
+      chrome.runtime.sendMessage({ type: "GET_SUBSCRIPTION" }, resolve);
     });
   }
 
   async loadOrgs() {
-    const data = await chrome.storage.sync.get(['orgs']);
+    const data = await chrome.storage.sync.get(["orgs"]);
     this.orgs = data.orgs || [];
   }
 
@@ -34,7 +34,7 @@ class OrgManager {
   async addOrg(orgData) {
     // Check subscription limits
     const maxOrgs = this.subscriptionInfo?.features?.maxOrgs || 2;
-    
+
     if (this.orgs.length >= maxOrgs) {
       this.showUpgradePrompt(maxOrgs);
       return false;
@@ -46,7 +46,7 @@ class OrgManager {
       url: orgData.url,
       type: orgData.type,
       addedAt: new Date().toISOString(),
-      lastAccessed: null
+      lastAccessed: null,
     });
 
     await this.saveOrgs();
@@ -55,8 +55,8 @@ class OrgManager {
   }
 
   showUpgradePrompt(currentLimit) {
-    const modal = document.createElement('div');
-    modal.className = 'upgrade-prompt-modal';
+    const modal = document.createElement("div");
+    modal.className = "upgrade-prompt-modal";
     modal.innerHTML = `
       <div class="modal-content">
         <div class="modal-header">
@@ -91,32 +91,32 @@ class OrgManager {
         </div>
       </div>
     `;
-    
+
     document.body.appendChild(modal);
   }
 
   redirectToUpgrade() {
-    chrome.tabs.create({ 
-      url: 'https://victorbrandaao.github.io/salesforce-arc-pilot-landing/#pricing' 
+    chrome.tabs.create({
+      url: "https://victorbrandaao.github.io/salesforce-arc-pilot-landing/#pricing",
     });
   }
 
   removeOrg(orgId) {
-    this.orgs = this.orgs.filter(org => org.id !== orgId);
+    this.orgs = this.orgs.filter((org) => org.id !== orgId);
     this.saveOrgs();
     this.renderOrgs();
   }
 
   async accessOrg(orgId) {
-    const org = this.orgs.find(o => o.id === orgId);
+    const org = this.orgs.find((o) => o.id === orgId);
     if (org) {
       // Update last accessed time
       org.lastAccessed = new Date().toISOString();
       await this.saveOrgs();
-      
+
       // Open org in new tab
       chrome.tabs.create({ url: org.url });
-      
+
       // Track usage for analytics (if premium)
       if (this.subscriptionInfo?.features?.analytics) {
         this.trackOrgAccess(org);
@@ -127,15 +127,15 @@ class OrgManager {
   trackOrgAccess(org) {
     // Send usage data to backend for analytics
     chrome.runtime.sendMessage({
-      type: 'TRACK_ORG_ACCESS',
+      type: "TRACK_ORG_ACCESS",
       orgId: org.id,
       orgType: org.type,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
   renderOrgs() {
-    const container = document.getElementById('orgs-list');
+    const container = document.getElementById("orgs-list");
     if (!container) return;
 
     const maxOrgs = this.subscriptionInfo?.features?.maxOrgs || 2;
@@ -143,18 +143,24 @@ class OrgManager {
 
     let html = `
       <div class="orgs-header">
-        <h3>Suas Orgs (${this.orgs.length}/${maxOrgs === 999 ? '∞' : maxOrgs})</h3>
-        ${canAddMore ? `
+        <h3>Suas Orgs (${this.orgs.length}/${
+      maxOrgs === 999 ? "∞" : maxOrgs
+    })</h3>
+        ${
+          canAddMore
+            ? `
           <button class="add-org-btn" onclick="orgManager.showAddOrgModal()">
             <i class="fas fa-plus"></i>
             Adicionar Org
           </button>
-        ` : `
+        `
+            : `
           <button class="add-org-btn disabled" onclick="orgManager.showUpgradePrompt(${maxOrgs})">
             <i class="fas fa-lock"></i>
             Upgrade para mais
           </button>
-        `}
+        `
+        }
       </div>
       
       <div class="orgs-grid">
@@ -171,7 +177,7 @@ class OrgManager {
         </div>
       `;
     } else {
-      this.orgs.forEach(org => {
+      this.orgs.forEach((org) => {
         html += `
           <div class="org-card" data-org-id="${org.id}">
             <div class="org-header">
@@ -183,46 +189,58 @@ class OrgManager {
                 <span class="org-type">${this.getOrgTypeLabel(org.type)}</span>
               </div>
               <div class="org-actions">
-                <button class="access-btn" onclick="orgManager.accessOrg('${org.id}')">
+                <button class="access-btn" onclick="orgManager.accessOrg('${
+                  org.id
+                }')">
                   <i class="fas fa-external-link-alt"></i>
                 </button>
-                <button class="remove-btn" onclick="orgManager.removeOrg('${org.id}')">
+                <button class="remove-btn" onclick="orgManager.removeOrg('${
+                  org.id
+                }')">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
             </div>
-            ${org.lastAccessed ? `
+            ${
+              org.lastAccessed
+                ? `
               <div class="org-footer">
                 <span class="last-accessed">
                   Último acesso: ${this.formatDate(org.lastAccessed)}
                 </span>
               </div>
-            ` : ''}
+            `
+                : ""
+            }
           </div>
         `;
       });
     }
 
-    html += '</div>';
+    html += "</div>";
     container.innerHTML = html;
   }
 
   getOrgTypeLabel(type) {
     const labels = {
-      'production': 'Produção',
-      'sandbox': 'Sandbox',
-      'developer': 'Developer',
-      'trailhead': 'Trailhead'
+      production: "Produção",
+      sandbox: "Sandbox",
+      developer: "Developer",
+      trailhead: "Trailhead",
     };
-    return labels[type] || 'Desconhecido';
+    return labels[type] || "Desconhecido";
   }
 
   formatDate(dateString) {
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+    return (
+      date.toLocaleDateString("pt-BR") +
+      " " +
+      date.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    );
   }
 
   showAddOrgModal() {
@@ -233,7 +251,7 @@ class OrgManager {
   bindEvents() {
     // Listen for subscription updates
     chrome.runtime.onMessage.addListener((message) => {
-      if (message.type === 'SUBSCRIPTION_UPDATED') {
+      if (message.type === "SUBSCRIPTION_UPDATED") {
         this.subscriptionInfo = message.subscription;
         this.renderOrgs();
       }

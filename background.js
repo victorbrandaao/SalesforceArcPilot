@@ -131,7 +131,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case "CANCEL_SUBSCRIPTION":
       if (window.subscriptionManager) {
-        window.subscriptionManager.cancelSubscription().then((result) => sendResponse(result));
+        window.subscriptionManager
+          .cancelSubscription()
+          .then((result) => sendResponse(result));
         return true;
       }
       break;
@@ -149,12 +151,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case "TRACK_ORG_ACCESS":
       // Send usage analytics to backend
-      if (window.subscriptionManager && window.subscriptionManager.hasFeature("analytics")) {
-        fetch(`${window.subscriptionManager.API_BASE_URL}/analytics/org-access`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(message),
-        }).catch(console.error);
+      if (
+        window.subscriptionManager &&
+        window.subscriptionManager.hasFeature("analytics")
+      ) {
+        fetch(
+          `${window.subscriptionManager.API_BASE_URL}/analytics/org-access`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(message),
+          }
+        ).catch(console.error);
       }
       break;
   }
