@@ -1,27 +1,37 @@
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://victorbrandao.github.io",
+      "http://localhost:3000",
+      "https://localhost:3000",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: "10mb" }));
-app.use(express.static("public"));
 
 // Simple in-memory storage (resets when server restarts - OK for free tier)
 const subscribers = [];
 const downloads = [];
+const analytics = [];
 
 // Health check
 app.get("/", (req, res) => {
   res.json({
-    status: "ok",
-    message: "Salesforce Arc Pilot API",
+    status: "🚀 Salesforce Arc Pilot API Online!",
+    version: "1.0.0",
+    timestamp: new Date().toISOString(),
     stats: {
       subscribers: subscribers.length,
       downloads: downloads.length,
+      analytics: analytics.length,
     },
   });
 });
@@ -36,24 +46,33 @@ app.post("/api/subscribe", (req, res) => {
     }
 
     // Check if email already exists
-    if (subscribers.find((sub) => sub.email === email)) {
-      return res.status(409).json({ error: "Email já cadastrado" });
+    const existingSubscriber = subscribers.find(
+      (sub) => sub.email.toLowerCase() === email.toLowerCase()
+    );
+    if (existingSubscriber) {
+      return res.status(409).json({
+        error: "Email já cadastrado",
+        message: "Este email já está na nossa lista!",
+      });
     }
 
     // Add subscriber
-    subscribers.push({
-      email,
+    const newSubscriber = {
+      email: email.toLowerCase(),
       source: source || "landing_page",
       language: language || "pt",
       subscribedAt: new Date().toISOString(),
       id: Date.now(),
-    });
+      ip: req.headers["x-forwarded-for"] || req.connection.remoteAddress,
+    };
+
+    subscribers.push(newSubscriber);
 
     console.log(`📧 New subscriber: ${email} (Total: ${subscribers.length})`);
 
     res.json({
       success: true,
-      message: "Email cadastrado com sucesso!",
+      message: "Email cadastrado com sucesso! 🎉",
       totalSubscribers: subscribers.length,
     });
   } catch (error) {
@@ -70,26 +89,30 @@ app.post("/api/download-link", (req, res) => {
     const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
     // Track download
-    downloads.push({
+    const downloadRecord = {
       type: type || "free",
       timestamp: new Date().toISOString(),
-      userAgent,
-      ip: ip?.split(",")[0], // First IP if behind proxy
+      userAgent: userAgent?.substring(0, 100),
+      ip: ip?.split(",")[0],
       id: Date.now(),
-    });
+    };
+
+    downloads.push(downloadRecord);
 
     console.log(`⬇️ Download tracked: ${type} (Total: ${downloads.length})`);
 
     // Return GitHub raw file URL (free hosting)
-    const downloadUrl =
-      type === "premium"
-        ? "https://raw.githubusercontent.com/your-username/salesforce-arc-pilot/main/dist/premium.zip"
-        : "https://raw.githubusercontent.com/your-username/salesforce-arc-pilot/main/dist/free.zip";
+    const downloadUrls = {
+      free: "https://github.com/victorbrandao-tech/SalesforceArcPilot/releases/download/v1.0.0/salesforce-arc-pilot-free.zip",
+      premium:
+        "https://github.com/victorbrandao-tech/SalesforceArcPilot/releases/download/v1.0.0/salesforce-arc-pilot-premium.zip",
+    };
 
     res.json({
       success: true,
-      downloadUrl,
+      downloadUrl: downloadUrls[type] || downloadUrls.free,
       totalDownloads: downloads.length,
+      message: "Link de download gerado com sucesso!",
     });
   } catch (error) {
     console.error("Download error:", error);
@@ -100,17 +123,32 @@ app.post("/api/download-link", (req, res) => {
 // Simple analytics (free)
 app.post("/api/analytics", (req, res) => {
   try {
-    const { event, parameters, timestamp, userAgent, referrer } = req.body;
+    const { event, parameters, timestamp, userAgent, referrer, page } =
+      req.body;
 
-    // Just log to console (you can upgrade to proper analytics later)
-    console.log(`📊 Analytics: ${event}`, {
-      parameters,
-      timestamp,
-      userAgent: userAgent?.substring(0, 50),
-      referrer,
-    });
+    const analyticsRecord = {
+      event,
+      parameters: parameters || {},
+      timestamp: timestamp || new Date().toISOString(),
+      userAgent: userAgent?.substring(0, 100),
+      referrer: referrer?.substring(0, 100),
+      page: page?.substring(0, 100),
+      ip: (
+        req.headers["x-forwarded-for"] || req.connection.remoteAddress
+      )?.split(",")[0],
+      id: Date.now(),
+    };
 
-    res.json({ received: true });
+    analytics.push(analyticsRecord);
+
+    // Keep only last 1000 analytics records (memory optimization)
+    if (analytics.length > 1000) {
+      analytics.splice(0, analytics.length - 1000);
+    }
+
+    console.log(`📊 Analytics: ${event}`, parameters);
+
+    res.json({ received: true, totalAnalytics: analytics.length });
   } catch (error) {
     console.error("Analytics error:", error);
     res.json({ received: false });
@@ -123,9 +161,10 @@ app.post("/api/generate-pix", (req, res) => {
     const { plan, amount } = req.body;
 
     // Generate a simple PIX code (this would integrate with real payment provider)
-    const pixCode = `00020126580014BR.GOV.BCB.PIX0136seu-email@exemplo.com520400005303986540${amount.toFixed(
+    const merchantKey = "victorbrandaotech@gmail.com";
+    const pixCode = `00020126580014BR.GOV.BCB.PIX0136${merchantKey}520400005303986540${amount.toFixed(
       2
-    )}5802BR5913VICTOR BRANDAO6009SAO PAULO630463041234`;
+    )}5802BR5913VICTOR BRANDAO6009SAO PAULO6304ABCD`;
 
     console.log(`💰 PIX generated: ${plan} - R$ ${amount}`);
 
@@ -134,7 +173,7 @@ app.post("/api/generate-pix", (req, res) => {
       pixCode,
       amount,
       plan,
-      message: "Código PIX gerado (simulação)",
+      message: "Código PIX gerado! (Este é um exemplo para demonstração)",
     });
   } catch (error) {
     console.error("PIX error:", error);
@@ -155,18 +194,29 @@ app.get("/api/stats", (req, res) => {
       (d) => new Date(d.timestamp).toDateString() === today
     ).length;
 
+    const todayAnalytics = analytics.filter(
+      (a) => new Date(a.timestamp).toDateString() === today
+    ).length;
+
     res.json({
       total: {
         subscribers: subscribers.length,
         downloads: downloads.length,
+        analytics: analytics.length,
       },
       today: {
         subscribers: todaySubscribers,
         downloads: todayDownloads,
+        analytics: todayAnalytics,
       },
       recent: {
-        subscribers: subscribers.slice(-5),
+        subscribers: subscribers.slice(-5).map((s) => ({
+          email: s.email.replace(/(.{3}).*(@.*)/, "$1***$2"),
+          date: s.subscribedAt,
+          source: s.source,
+        })),
         downloads: downloads.slice(-5),
+        topEvents: this.getTopEvents(),
       },
     });
   } catch (error) {
@@ -175,59 +225,151 @@ app.get("/api/stats", (req, res) => {
   }
 });
 
+// Helper function for top events
+function getTopEvents() {
+  const eventCounts = {};
+  analytics.forEach((a) => {
+    eventCounts[a.event] = (eventCounts[a.event] || 0) + 1;
+  });
+
+  return Object.entries(eventCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([event, count]) => ({ event, count }));
+}
+
 // Simple admin dashboard (password protected)
 app.get("/admin", (req, res) => {
   const { password } = req.query;
 
-  if (password !== "sua-senha-secreta") {
-    return res.status(401).send("Acesso negado");
+  if (password !== "salesforce2024") {
+    return res.status(401).send(`
+            <html>
+            <head><title>Admin Login</title></head>
+            <body style="font-family: Arial; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f9ff;">
+                <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                    <h2>🔐 Admin Access</h2>
+                    <form>
+                        <input type="password" name="password" placeholder="Digite a senha" style="padding: 12px; width: 200px; border: 1px solid #ddd; border-radius: 6px; margin-right: 10px;">
+                        <button type="submit" style="padding: 12px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">Entrar</button>
+                    </form>
+                </div>
+            </body>
+            </html>
+        `);
   }
+
+  const todaySubscribers = subscribers.filter(
+    (s) => new Date(s.subscribedAt).toDateString() === new Date().toDateString()
+  ).length;
+
+  const todayDownloads = downloads.filter(
+    (d) => new Date(d.timestamp).toDateString() === new Date().toDateString()
+  ).length;
 
   res.send(`
         <html>
-        <head><title>Admin Dashboard</title></head>
-        <body style="font-family: Arial; padding: 20px;">
-            <h1>📊 Salesforce Arc Pilot - Dashboard</h1>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
-                <div style="background: #f0f9ff; padding: 20px; border-radius: 8px;">
-                    <h3>📧 Subscribers</h3>
-                    <p style="font-size: 24px; margin: 0;">${
-                      subscribers.length
-                    }</p>
+        <head>
+            <title>Admin Dashboard</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f8fafc; }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+                .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0; }
+                .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                .stat-number { font-size: 28px; font-weight: bold; color: #3b82f6; }
+                .recent-section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 20px 0; }
+                .recent-item { padding: 10px; border-bottom: 1px solid #f1f5f9; }
+                .recent-item:last-child { border-bottom: none; }
+                .email-masked { font-family: monospace; color: #64748b; }
+                .timestamp { color: #94a3b8; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🚀 Salesforce Arc Pilot - Dashboard</h1>
+                <p>Monitoramento em tempo real • Atualizado em ${new Date().toLocaleString(
+                  "pt-BR"
+                )}</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>📧 Total Subscribers</h3>
+                    <div class="stat-number">${subscribers.length}</div>
+                    <p>+${todaySubscribers} hoje</p>
                 </div>
-                <div style="background: #f0fdf4; padding: 20px; border-radius: 8px;">
-                    <h3>⬇️ Downloads</h3>
-                    <p style="font-size: 24px; margin: 0;">${
-                      downloads.length
-                    }</p>
+                <div class="stat-card">
+                    <h3>⬇️ Total Downloads</h3>
+                    <div class="stat-number">${downloads.length}</div>
+                    <p>+${todayDownloads} hoje</p>
+                </div>
+                <div class="stat-card">
+                    <h3>📊 Analytics Events</h3>
+                    <div class="stat-number">${analytics.length}</div>
+                    <p>Últimas 24h</p>
+                </div>
+                <div class="stat-card">
+                    <h3>🌍 Status</h3>
+                    <div class="stat-number">Online</div>
+                    <p>API funcionando</p>
                 </div>
             </div>
-            <h3>Recent Subscribers:</h3>
-            <ul>
+            
+            <div class="recent-section">
+                <h3>📧 Recent Subscribers (${subscribers.length})</h3>
                 ${subscribers
                   .slice(-10)
                   .reverse()
                   .map(
                     (s) =>
-                      `<li>${s.email} - ${new Date(
-                        s.subscribedAt
-                      ).toLocaleString("pt-BR")}</li>`
+                      `<div class="recent-item">
+                        <div class="email-masked">${s.email.replace(
+                          /(.{3}).*(@.*)/,
+                          "$1***$2"
+                        )}</div>
+                        <div class="timestamp">${new Date(
+                          s.subscribedAt
+                        ).toLocaleString("pt-BR")} • ${s.source}</div>
+                    </div>`
                   )
                   .join("")}
-            </ul>
-            <h3>Recent Downloads:</h3>
-            <ul>
+            </div>
+            
+            <div class="recent-section">
+                <h3>⬇️ Recent Downloads (${downloads.length})</h3>
                 ${downloads
                   .slice(-10)
                   .reverse()
                   .map(
                     (d) =>
-                      `<li>${d.type} - ${new Date(d.timestamp).toLocaleString(
-                        "pt-BR"
-                      )}</li>`
+                      `<div class="recent-item">
+                        <div><strong>${d.type}</strong></div>
+                        <div class="timestamp">${new Date(
+                          d.timestamp
+                        ).toLocaleString("pt-BR")}</div>
+                    </div>`
                   )
                   .join("")}
-            </ul>
+            </div>
+            
+            <div class="recent-section">
+                <h3>📊 Top Events</h3>
+                ${getTopEvents()
+                  .map(
+                    (e) => `
+                    <div class="recent-item">
+                        <div><strong>${e.event}</strong></div>
+                        <div class="timestamp">${e.count} ocorrências</div>
+                    </div>`
+                  )
+                  .join("")}
+            </div>
+            
+            <script>
+                // Auto refresh every 30 seconds
+                setTimeout(() => location.reload(), 30000);
+            </script>
         </body>
         </html>
     `);
@@ -241,12 +383,23 @@ app.use((error, req, res, next) => {
 
 // 404 handler
 app.use("*", (req, res) => {
-  res.status(404).json({ error: "Endpoint não encontrado" });
+  res.status(404).json({
+    error: "Endpoint não encontrado",
+    availableEndpoints: [
+      "GET / - Health check",
+      "POST /api/subscribe - Email subscription",
+      "POST /api/download-link - Download tracking",
+      "POST /api/analytics - Analytics",
+      "GET /api/stats - Statistics",
+      "GET /admin?password=XXX - Admin dashboard",
+    ],
+  });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Salesforce Arc Pilot API running on port ${PORT}`);
   console.log(
-    `📊 Admin: http://localhost:${PORT}/admin?password=sua-senha-secreta`
+    `📊 Admin: https://your-app.railway.app/admin?password=salesforce2024`
   );
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
 });
