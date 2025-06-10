@@ -1,8 +1,51 @@
 // Import subscription manager
 importScripts("subscription-manager.js");
 
+// Define CONFIG directly since we can't import it in service worker
+const CONFIG = {
+  API_BASE_URL: "https://salesforcearcpilot-production.up.railway.app/api",
+  LANDING_PAGE_URL:
+    "https://victorbrandaao.github.io/salesforce-arc-pilot-landing",
+  VERSION: "1.0.0",
+
+  PLANS: {
+    free: {
+      name: "Grátis",
+      maxOrgs: 2,
+      analytics: false,
+      darkMode: false,
+      cloudSync: false,
+      backup: false,
+    },
+    premium: {
+      name: "Premium",
+      maxOrgs: 999,
+      analytics: true,
+      darkMode: true,
+      cloudSync: true,
+      backup: true,
+    },
+  },
+
+  DEFAULT_SETTINGS: {
+    language: "pt",
+    theme: "light",
+    notifications: true,
+    autoBackup: false,
+    cloudSync: false,
+  },
+
+  SALESFORCE_DOMAINS: [
+    "salesforce.com",
+    "force.com",
+    "lightning.force.com",
+    "my.salesforce.com",
+  ],
+};
+
 class BackgroundService {
   constructor() {
+    this.CONFIG = CONFIG;
     this.setupEventListeners();
     this.init();
   }
@@ -43,10 +86,10 @@ class BackgroundService {
     try {
       switch (message.type) {
         case "GET_SUBSCRIPTION":
-          if (window.subscriptionManager) {
-            sendResponse(window.subscriptionManager.getSubscriptionInfo());
+          if (self.subscriptionManager) {
+            sendResponse(self.subscriptionManager.getSubscriptionInfo());
           } else {
-            sendResponse({ plan: "free", features: window.CONFIG.PLANS.free });
+            sendResponse({ plan: "free", features: this.CONFIG.PLANS.free });
           }
           break;
 
@@ -63,6 +106,26 @@ class BackgroundService {
         case "CHECK_ORG_LIMIT":
           const canAdd = await this.checkOrgLimit();
           sendResponse({ canAdd });
+          break;
+
+        case "ADD_ORG":
+          const result = await this.addOrg(message.orgData);
+          sendResponse(result);
+          break;
+
+        case "DELETE_ORG":
+          const deleteResult = await this.deleteOrg(message.orgId);
+          sendResponse(deleteResult);
+          break;
+
+        case "GET_ORGS":
+          const orgs = await this.getOrgs();
+          sendResponse({ orgs });
+          break;
+
+        case "ACCESS_ORG":
+          await this.accessOrg(message.orgId);
+          sendResponse({ success: true });
           break;
 
         default:
@@ -83,12 +146,12 @@ class BackgroundService {
         language: "pt",
         theme: "light",
         orgs: [],
-        settings: window.CONFIG.DEFAULT_SETTINGS,
+        settings: this.CONFIG.DEFAULT_SETTINGS,
       });
 
       // Open welcome page
       chrome.tabs.create({
-        url: `${window.CONFIG.LANDING_PAGE_URL}?welcome=true`,
+        url: `${this.CONFIG.LANDING_PAGE_URL}?welcome=true`,
       });
 
       // Track installation
@@ -130,9 +193,8 @@ class BackgroundService {
   }
 
   isSalesforcePage(url) {
-    return window.CONFIG.SALESFORCE_DOMAINS.some((domain) => {
-      const pattern = domain.replace("*", ".*");
-      return new RegExp(pattern).test(url);
+    return this.CONFIG.SALESFORCE_DOMAINS.some((domain) => {
+      return url.includes(domain);
     });
   }
 
@@ -141,14 +203,124 @@ class BackgroundService {
       const data = await chrome.storage.sync.get(["orgs"]);
       const orgs = data.orgs || [];
 
-      if (window.subscriptionManager) {
-        return window.subscriptionManager.canAddOrg(orgs.length);
+      if (self.subscriptionManager) {
+        return self.subscriptionManager.canAddOrg(orgs.length);
       }
 
       return orgs.length < 2; // Default free limit
     } catch (error) {
       console.error("Error checking org limit:", error);
       return false;
+    }
+  }
+
+  async addOrg(orgData) {
+    try {
+      // Check org limit first
+      const canAdd = await this.checkOrgLimit();
+      if (!canAdd) {
+        return {
+          success: false,
+          error: "Limite de orgs atingido. Faça upgrade para adicionar mais.",
+        };
+      }
+
+      // Get current orgs
+      const data = await chrome.storage.sync.get(["orgs"]);
+      const orgs = data.orgs || [];
+
+      // Create new org
+      const newOrg = {
+        id: Date.now().toString(),
+        name: orgData.name,
+        url: orgData.url,
+        type: orgData.type,
+        description: orgData.description || "",
+        addedAt: new Date().toISOString(),
+        lastAccessed: null,
+        accessCount: 0,
+      };
+
+      // Add to list
+      orgs.push(newOrg);
+
+      // Save to storage
+      await chrome.storage.sync.set({ orgs });
+
+      // Track event
+      this.trackEvent("org_added", {
+        orgType: newOrg.type,
+        totalOrgs: orgs.length,
+      });
+
+      return { success: true, org: newOrg };
+    } catch (error) {
+      console.error("Error adding org:", error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteOrg(orgId) {
+    try {
+      // Get current orgs
+      const data = await chrome.storage.sync.get(["orgs"]);
+      const orgs = data.orgs || [];
+
+      // Filter out the org
+      const updatedOrgs = orgs.filter((org) => org.id !== orgId);
+
+      // Save to storage
+      await chrome.storage.sync.set({ orgs: updatedOrgs });
+
+      // Track event
+      this.trackEvent("org_deleted", {
+        totalOrgs: updatedOrgs.length,
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting org:", error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getOrgs() {
+    try {
+      const data = await chrome.storage.sync.get(["orgs"]);
+      return data.orgs || [];
+    } catch (error) {
+      console.error("Error getting orgs:", error);
+      return [];
+    }
+  }
+
+  async accessOrg(orgId) {
+    try {
+      // Get current orgs
+      const data = await chrome.storage.sync.get(["orgs"]);
+      const orgs = data.orgs || [];
+
+      // Find and update the org
+      const orgIndex = orgs.findIndex((org) => org.id === orgId);
+      if (orgIndex !== -1) {
+        orgs[orgIndex].lastAccessed = new Date().toISOString();
+        orgs[orgIndex].accessCount = (orgs[orgIndex].accessCount || 0) + 1;
+
+        // Save to storage
+        await chrome.storage.sync.set({ orgs });
+
+        // Track access
+        this.trackOrgAccess({
+          orgId,
+          orgType: orgs[orgIndex].type,
+          accessCount: orgs[orgIndex].accessCount,
+        });
+
+        // Open the org URL
+        chrome.tabs.create({ url: orgs[orgIndex].url });
+      }
+    } catch (error) {
+      console.error("Error accessing org:", error);
     }
   }
 
@@ -161,13 +333,13 @@ class BackgroundService {
           ...data,
           timestamp: new Date().toISOString(),
           version: chrome.runtime.getManifest().version,
-          userId: window.subscriptionManager?.userId,
+          userId: self.subscriptionManager?.userId,
         },
       };
 
       // Send to backend if subscription manager has analytics
-      if (window.subscriptionManager?.hasFeature("analytics")) {
-        fetch(`${window.CONFIG.API_BASE_URL}/analytics/event`, {
+      if (self.subscriptionManager?.hasFeature("analytics")) {
+        fetch(`${this.CONFIG.API_BASE_URL}/analytics/event`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -186,13 +358,13 @@ class BackgroundService {
     try {
       const accessData = {
         ...data,
-        userId: window.subscriptionManager?.userId,
+        userId: self.subscriptionManager?.userId,
         timestamp: data.timestamp || new Date().toISOString(),
       };
 
       // Send to backend for analytics
-      if (window.subscriptionManager?.hasFeature("analytics")) {
-        fetch(`${window.CONFIG.API_BASE_URL}/analytics/org-access`, {
+      if (self.subscriptionManager?.hasFeature("analytics")) {
+        fetch(`${this.CONFIG.API_BASE_URL}/analytics/org-access`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

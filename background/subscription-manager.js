@@ -5,6 +5,26 @@ class SubscriptionManager {
       "https://salesforcearcpilot-production.up.railway.app/api";
     this.subscriptionData = null;
     this.userId = null;
+
+    // Define plans directly
+    this.PLANS = {
+      free: {
+        name: "Grátis",
+        maxOrgs: 2,
+        analytics: false,
+        darkMode: false,
+        cloudSync: false,
+        backup: false,
+      },
+      premium: {
+        name: "Premium",
+        maxOrgs: 999,
+        analytics: true,
+        darkMode: true,
+        cloudSync: true,
+        backup: true,
+      },
+    };
   }
 
   async init() {
@@ -30,7 +50,7 @@ class SubscriptionManager {
         plan: "free",
         status: "active",
         expiresAt: null,
-        features: window.CONFIG.PLANS.free,
+        features: this.PLANS.free,
       };
 
       await chrome.storage.sync.set({ subscription: this.subscriptionData });
@@ -72,7 +92,7 @@ class SubscriptionManager {
     return {
       plan: this.subscriptionData?.plan || "free",
       status: this.subscriptionData?.status || "active",
-      features: this.subscriptionData?.features || window.CONFIG.PLANS.free,
+      features: this.subscriptionData?.features || this.PLANS.free,
       expiresAt: this.subscriptionData?.expiresAt,
       userId: this.userId,
     };
@@ -128,7 +148,7 @@ class SubscriptionManager {
         plan: "free",
         status: "active",
         expiresAt: null,
-        features: window.CONFIG.PLANS.free,
+        features: this.PLANS.free,
       };
       await chrome.storage.sync.set({ subscription: this.subscriptionData });
       this.notifySubscriptionUpdate();
