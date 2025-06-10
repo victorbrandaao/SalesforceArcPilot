@@ -1,37 +1,39 @@
 class SubscriptionManager {
   constructor() {
     this.API_BASE_URL =
+      window.CONFIG?.API_BASE_URL ||
       "https://salesforcearcpilot-production.up.railway.app/api";
     this.subscriptionData = null;
-    this.init();
+    this.userId = null;
   }
 
   async init() {
     await this.loadSubscriptionData();
     this.startPeriodicCheck();
+    console.log("💎 Subscription Manager initialized");
   }
 
   async loadSubscriptionData() {
     try {
       const data = await chrome.storage.sync.get(["subscription", "userId"]);
+
+      // Generate userId if not exists
+      if (!data.userId) {
+        this.userId = this.generateUserId();
+        await chrome.storage.sync.set({ userId: this.userId });
+      } else {
+        this.userId = data.userId;
+      }
+
+      // Set default subscription
       this.subscriptionData = data.subscription || {
         plan: "free",
         status: "active",
         expiresAt: null,
-        features: {
-          maxOrgs: 2,
-          analytics: false,
-          darkMode: false,
-          cloudSync: false,
-          backup: false,
-        },
+        features: window.CONFIG.PLANS.free,
       };
 
-      // Generate userId if not exists
-      if (!data.userId) {
-        const userId = this.generateUserId();
-        await chrome.storage.sync.set({ userId });
-      }
+      await chrome.storage.sync.set({ subscription: this.subscriptionData });
     } catch (error) {
       console.error("Error loading subscription:", error);
     }
@@ -43,9 +45,8 @@ class SubscriptionManager {
 
   async checkSubscriptionStatus() {
     try {
-      const { userId } = await chrome.storage.sync.get(["userId"]);
       const response = await fetch(
-        `${this.API_BASE_URL}/subscription/${userId}`,
+        `${this.API_BASE_URL}/subscription/${this.userId}`,
         {
           method: "GET",
           headers: {
@@ -58,6 +59,7 @@ class SubscriptionManager {
         const data = await response.json();
         this.subscriptionData = data.subscription;
         await chrome.storage.sync.set({ subscription: this.subscriptionData });
+        this.notifySubscriptionUpdate();
         return true;
       }
     } catch (error) {
@@ -66,90 +68,23 @@ class SubscriptionManager {
     return false;
   }
 
-  async upgradeSubscription(plan, paymentData) {
-    try {
-      const { userId } = await chrome.storage.sync.get(["userId"]);
-      const response = await fetch(
-        `${this.API_BASE_URL}/subscription/upgrade`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            plan,
-            paymentData,
-            timestamp: new Date().toISOString(),
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        this.subscriptionData = data.subscription;
-        await chrome.storage.sync.set({ subscription: this.subscriptionData });
-
-        // Notify all tabs about subscription update
-        this.notifySubscriptionUpdate();
-        return { success: true, subscription: this.subscriptionData };
-      } else {
-        const error = await response.json();
-        return { success: false, error: error.message };
-      }
-    } catch (error) {
-      console.error("Error upgrading subscription:", error);
-      return { success: false, error: "Network error" };
-    }
-  }
-
-  async cancelSubscription() {
-    try {
-      const { userId } = await chrome.storage.sync.get(["userId"]);
-      const response = await fetch(`${this.API_BASE_URL}/subscription/cancel`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId,
-          timestamp: new Date().toISOString(),
-        }),
-      });
-
-      if (response.ok) {
-        // Keep premium features until expiry date
-        this.subscriptionData.status = "cancelled";
-        await chrome.storage.sync.set({ subscription: this.subscriptionData });
-        return { success: true };
-      }
-    } catch (error) {
-      console.error("Error cancelling subscription:", error);
-    }
-    return { success: false };
-  }
-
-  canAddOrg(currentOrgCount) {
-    const maxOrgs = this.subscriptionData?.features?.maxOrgs || 2;
-    return currentOrgCount < maxOrgs;
+  getSubscriptionInfo() {
+    return {
+      plan: this.subscriptionData?.plan || "free",
+      status: this.subscriptionData?.status || "active",
+      features: this.subscriptionData?.features || window.CONFIG.PLANS.free,
+      expiresAt: this.subscriptionData?.expiresAt,
+      userId: this.userId,
+    };
   }
 
   hasFeature(feature) {
     return this.subscriptionData?.features?.[feature] || false;
   }
 
-  getSubscriptionInfo() {
-    return {
-      plan: this.subscriptionData?.plan || "free",
-      status: this.subscriptionData?.status || "active",
-      features: this.subscriptionData?.features || {},
-      expiresAt: this.subscriptionData?.expiresAt,
-    };
-  }
-
-  async getOrgsLimit() {
-    await this.loadSubscriptionData();
-    return this.subscriptionData?.features?.maxOrgs || 2;
+  canAddOrg(currentOrgCount) {
+    const maxOrgs = this.subscriptionData?.features?.maxOrgs || 2;
+    return currentOrgCount < maxOrgs;
   }
 
   notifySubscriptionUpdate() {
@@ -164,6 +99,14 @@ class SubscriptionManager {
           .catch(() => {}); // Ignore errors for non-extension pages
       });
     });
+
+    // Also notify popup if open
+    chrome.runtime
+      .sendMessage({
+        type: "SUBSCRIPTION_UPDATED",
+        subscription: this.subscriptionData,
+      })
+      .catch(() => {});
   }
 
   startPeriodicCheck() {
@@ -185,13 +128,7 @@ class SubscriptionManager {
         plan: "free",
         status: "active",
         expiresAt: null,
-        features: {
-          maxOrgs: 2,
-          analytics: false,
-          darkMode: false,
-          cloudSync: false,
-          backup: false,
-        },
+        features: window.CONFIG.PLANS.free,
       };
       await chrome.storage.sync.set({ subscription: this.subscriptionData });
       this.notifySubscriptionUpdate();

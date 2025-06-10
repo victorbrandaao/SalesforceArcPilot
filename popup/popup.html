@@ -1,540 +1,330 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
   <head>
-    <title>Salesforce ArcPilot</title>
-    <link rel="stylesheet" href="popup.css" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Salesforce Arc Pilot</title>
+    <link rel="stylesheet" href="popup.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <div class="container">
-      <!-- Header melhorado com indicadores de status -->
-      <div class="header">
-        <div class="header-content">
-          <img src="../icons/logo.png" alt="Salesforce ArcPilot" class="logo" />
-          <div class="header-text">
-            <h1 id="main-title" class="title-heading"></h1>
-            <div class="status-indicators">
-              <span id="cli-status" class="status-indicator">
-                <span class="status-dot checking"></span>
-                <span id="cli-status-text">Verificando CLI...</span>
-              </span>
-            </div>
-          </div>
+    <div id="app" class="app">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <i class="fas fa-rocket"></i>
+          <span>Arc Pilot</span>
+        </div>
+        <div class="header-actions">
+          <button class="btn-icon" id="theme-toggle" title="Alternar tema">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button class="btn-icon" id="settings-btn" title="Configurações">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" id="search-input" placeholder="Buscar orgs..." />
+          <button class="btn-clear" id="clear-search" style="display: none">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
       </div>
 
-      <!-- Quick Actions Bar -->
-      <div class="quick-actions">
-        <button id="refresh-all-btn" class="action-btn primary">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path
-              d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
-            ></path>
-          </svg>
-          <span id="refresh-all-text">Atualizar Tudo</span>
-        </button>
-        <button id="settings-btn" class="action-btn secondary">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <circle cx="12" cy="12" r="3"></circle>
-            <path
-              d="m12 1 2.9 5.4 6.1.9-4.5 4.3 1.1 6.4L12 15.4l-5.6 2.6 1.1-6.4L3 7.3l6.1-.9L12 1z"
-            ></path>
-          </svg>
-          <span id="settings-text">Configurações</span>
-        </button>
+      <!-- Subscription Status -->
+      <div id="subscription-status" class="subscription-status">
+        <!-- Will be populated by JavaScript -->
       </div>
 
-      <!-- CLI Orgs Section - Melhorada -->
-      <div class="section-card cli-section">
+      <!-- Orgs Section -->
+      <main class="main-content">
         <div class="section-header">
-          <div class="section-info">
-            <h2 id="cli-orgs-section-title" class="section-heading"></h2>
-            <span id="cli-org-count" class="org-count">0 orgs</span>
-          </div>
-          <div class="section-actions">
-            <button id="search-toggle-btn" class="icon-btn" title="Buscar">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-            </button>
-            <button
-              id="refresh-cli-orgs-btn"
-              class="icon-btn"
-              title="Atualizar"
-            ></button>
-          </div>
+          <h2 data-i18n="orgs.title">Suas Orgs</h2>
+          <span class="org-count" id="org-count">0/2</span>
         </div>
 
-        <!-- Search Bar -->
-        <div id="search-bar" class="search-bar hidden">
-          <input
-            type="text"
-            id="org-search"
-            placeholder="Buscar por alias, username ou URL..."
-          />
-          <button id="clear-search" class="clear-btn">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <button class="btn-action" id="add-org-btn">
+            <i class="fas fa-plus"></i>
+            <span data-i18n="orgs.addBtn">Adicionar Org</span>
+          </button>
+          <button class="btn-action" id="sync-btn" style="display: none">
+            <i class="fas fa-sync"></i>
+            <span data-i18n="orgs.syncBtn">Sincronizar</span>
           </button>
         </div>
 
-        <div id="cli-org-list" class="org-list cli-list">
-          <div class="loading-skeleton">
-            <div class="skeleton-item"></div>
-            <div class="skeleton-item"></div>
-            <div class="skeleton-item"></div>
-          </div>
+        <!-- Orgs List -->
+        <div id="orgs-list" class="orgs-list">
+          <!-- Will be populated by JavaScript -->
         </div>
-        <p class="message" id="no-cli-orgs-message" style="display: none"></p>
-      </div>
 
-      <div class="divider"></div>
-
-      <!-- Manual Orgs Section - Melhorada -->
-      <div class="section-card manual-section">
-        <div class="section-header">
-          <div class="section-info">
-            <h2 id="add-org-section-title" class="section-heading"></h2>
-            <span id="manual-org-count" class="org-count">0 orgs</span>
-          </div>
-          <button id="toggle-add-form" class="icon-btn" title="Adicionar Org">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state" style="display: none">
+          <i class="fas fa-database"></i>
+          <h3 data-i18n="orgs.emptyTitle">Nenhuma org adicionada</h3>
+          <p data-i18n="orgs.emptyDescription">
+            Adicione sua primeira org Salesforce para começar
+          </p>
+          <button class="btn-primary" id="add-first-org">
+            <i class="fas fa-plus"></i>
+            <span data-i18n="orgs.addFirstBtn">Adicionar primeira org</span>
           </button>
         </div>
+      </main>
 
-        <!-- Formulário expandido -->
-        <div id="manual-org-form" class="manual-org-form collapsed">
-          <div class="form-grid">
-            <div class="input-group">
-              <label for="org-alias" id="alias-label">Alias da Org</label>
-              <input type="text" id="org-alias" required autocomplete="off" />
-            </div>
-            <div class="input-group">
-              <label for="org-url" id="url-label">URL da Org</label>
-              <input type="url" id="org-url" required autocomplete="off" />
-            </div>
-          </div>
-          <div class="form-actions">
-            <button id="add-org-btn" class="add-button"></button>
-            <button id="cancel-add-btn" class="cancel-button">Cancelar</button>
-          </div>
-        </div>
-
-        <div id="org-list" class="org-list manual-list">
-          <p class="message" id="no-orgs-message" style="display: none"></p>
-        </div>
-      </div>
-
-      <!-- Analytics Panel (Opcional) -->
-      <div
-        class="section-card analytics-section collapsed"
-        id="analytics-section"
-      >
-        <div class="section-header">
-          <h3 class="section-heading">📊 Estatísticas de Uso</h3>
-          <button id="toggle-analytics" class="icon-btn">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"></polyline>
-            </svg>
-          </button>
-        </div>
-        <div class="analytics-content">
-          <div class="stat-grid">
-            <div class="stat-item">
-              <span class="stat-value" id="total-opens">0</span>
-              <span class="stat-label">Orgs Abertas</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value" id="time-saved">0min</span>
-              <span class="stat-label">Tempo Economizado</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value" id="most-used-org">-</span>
-              <span class="stat-label">Org Mais Usada</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PIX Donation Section -->
-      <div class="section-card donation-section">
-        <div class="section-header">
-          <div class="section-info">
-            <h3 class="section-heading">💝 Apoie o Projeto</h3>
-            <span class="org-count">PIX • Contribuição</span>
-          </div>
-          <div class="section-actions">
-            <button
-              class="icon-btn"
-              id="toggle-donation"
-              title="Expandir/Recolher Doação"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="donation-content" id="donation-content">
-          <div class="donation-info">
-            <p>
-              Se esta extensão está ajudando você, considere fazer uma doação
-              PIX para apoiar o desenvolvimento!
-            </p>
-
-            <div class="pix-container">
-              <div class="pix-qr">
-                <div class="qr-placeholder">
-                  <svg
-                    width="80"
-                    height="80"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1"
-                  >
-                    <rect x="3" y="3" width="7" height="7" rx="1"></rect>
-                    <rect x="14" y="3" width="7" height="7" rx="1"></rect>
-                    <rect x="3" y="14" width="7" height="7" rx="1"></rect>
-                    <path d="M14 14h3v3h-3z"></path>
-                    <path d="M18 14v3"></path>
-                    <path d="M14 18h3"></path>
-                    <path d="M18 18v3h3"></path>
-                  </svg>
-                </div>
-                <p class="qr-label">QR Code PIX</p>
-              </div>
-
-              <div class="pix-details">
-                <div class="pix-key-container">
-                  <label>Chave PIX (CPF):</label>
-                  <div class="pix-key-group">
-                    <input
-                      type="text"
-                      id="pix-key"
-                      value="victorbrandaotech@gmail.com"
-                      readonly
-                    />
-                    <button
-                      class="copy-pix-btn"
-                      data-action="copy-pix"
-                      title="Copiar Chave PIX"
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <rect
-                          x="9"
-                          y="9"
-                          width="13"
-                          height="13"
-                          rx="2"
-                          ry="2"
-                        ></rect>
-                        <path
-                          d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                        ></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="donation-amounts">
-                  <label>Valores sugeridos:</label>
-                  <div class="amount-buttons">
-                    <button class="amount-btn" data-amount="5">R$ 5</button>
-                    <button class="amount-btn" data-amount="10">R$ 10</button>
-                    <button class="amount-btn" data-amount="25">R$ 25</button>
-                    <button class="amount-btn" data-amount="50">R$ 50</button>
-                  </div>
-                </div>
-
-                <div class="donation-message">
-                  <p>
-                    💚 Obrigado por apoiar o desenvolvimento desta extensão!
-                  </p>
-                  <small
-                    >Cada contribuição ajuda a manter o projeto ativo e melhorar
-                    ainda mais.</small
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Toast Container -->
-      <div id="toast-container" class="toast-container"></div>
-
-      <!-- Settings Modal -->
-      <div id="settings-modal" class="modal">
-        <div class="modal-content settings-modal">
-          <div class="modal-header">
-            <h3>⚙️ Configurações</h3>
-            <button id="close-settings" class="close-btn">×</button>
-          </div>
-          <div class="modal-body">
-            <div class="setting-group">
-              <label class="setting-label">
-                <input type="checkbox" id="auto-refresh" checked />
-                <span class="checkmark"></span>
-                <span>Atualização automática a cada 30s</span>
-              </label>
-            </div>
-            <div class="setting-group">
-              <label class="setting-label">
-                <input type="checkbox" id="show-analytics" />
-                <span class="checkmark"></span>
-                <span>Mostrar estatísticas de uso</span>
-              </label>
-            </div>
-            <div class="setting-group">
-              <label class="setting-label">
-                <input type="checkbox" id="confirm-delete" checked />
-                <span class="checkmark"></span>
-                <span>Confirmar antes de excluir org</span>
-              </label>
-            </div>
-            <div class="setting-group">
-              <label class="setting-label">
-                <select id="theme-select">
-                  <option value="auto">Tema automático</option>
-                  <option value="light">Tema claro</option>
-                  <option value="dark">Tema escuro</option>
-                </select>
-                <span>Tema da interface</span>
-              </label>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button id="reset-settings" class="secondary-btn">
-              Restaurar Padrões
-            </button>
-            <button id="save-settings" class="primary-btn">Salvar</button>
-          </div>
-        </div>
-        <div class="modal-overlay"></div>
-      </div>
-
-      <!-- Rodapé com sistema de doações -->
+      <!-- Footer -->
       <footer class="footer">
-        <div class="footer-content">
-          <div class="support-section">
-            <div class="support-icon">☕</div>
-            <div class="support-text">
-              <p class="support-title" id="support-title">
-                Gostou da extensão?
-              </p>
-              <p class="support-subtitle" id="support-subtitle">
-                Apoie o desenvolvimento
-              </p>
-            </div>
-            <button class="donate-btn" id="donate-btn">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                />
-              </svg>
-              <span id="donate-text">Doar com PIX</span>
-            </button>
-          </div>
-
-          <!-- Modal de doação -->
-          <div class="donation-modal" id="donation-modal">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h3 id="modal-title">💝 Apoie este projeto</h3>
-                <button class="close-btn" id="close-modal">×</button>
-              </div>
-              <div class="modal-body">
-                <div class="pix-section">
-                  <div class="pix-icon">📱</div>
-                  <p id="pix-instructions">
-                    Escaneie o QR Code ou copie a chave PIX:
-                  </p>
-
-                  <!-- QR Code placeholder -->
-                  <div class="qr-code">
-                    <div class="qr-placeholder">
-                      <svg
-                        width="120"
-                        height="120"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1"
-                      >
-                        <rect x="3" y="3" width="7" height="7" />
-                        <rect x="14" y="3" width="7" height="7" />
-                        <rect x="3" y="14" width="7" height="7" />
-                        <path d="m5 5 2 2" />
-                        <path d="m5 17 2 2" />
-                        <path d="m17 5 2 2" />
-                        <path d="m15 15 1 1" />
-                        <path d="m18 15 1 1" />
-                        <path d="m15 18 1 1" />
-                        <path d="m18 18 1 1" />
-                      </svg>
-                      <p id="qr-placeholder-text">QR Code PIX</p>
-                    </div>
-                  </div>
-
-                  <!-- Chave PIX -->
-                  <div class="pix-key">
-                    <label id="pix-key-label">Chave PIX:</label>
-                    <div class="pix-key-input">
-                      <input
-                        type="text"
-                        id="pix-key"
-                        value="victorbrandao@example.com"
-                        readonly
-                      />
-                      <button class="copy-btn" id="copy-pix">
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                        >
-                          <rect
-                            x="9"
-                            y="9"
-                            width="13"
-                            height="13"
-                            rx="2"
-                            ry="2"
-                          />
-                          <path
-                            d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Valores sugeridos -->
-                  <div class="suggested-amounts">
-                    <p id="suggested-amounts-label">Valores sugeridos:</p>
-                    <div class="amount-buttons">
-                      <button class="amount-btn" data-amount="5">R$ 5</button>
-                      <button class="amount-btn" data-amount="10">R$ 10</button>
-                      <button class="amount-btn" data-amount="20">R$ 20</button>
-                      <button class="amount-btn" data-amount="50">R$ 50</button>
-                    </div>
-                  </div>
-
-                  <div class="thank-you">
-                    <p id="thank-you-text">
-                      💚 Sua contribuição ajuda a manter este projeto ativo e
-                      gratuito!
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="modal-overlay"></div>
-          </div>
-
-          <!-- Informações do desenvolvedor -->
-          <div class="developer-info">
-            <span id="developer-text">Desenvolvido por</span>
-            <a
-              href="https://github.com/victorbrandaao"
-              target="_blank"
-              class="developer-link"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
-                />
-              </svg>
-              Victor Brandão
-            </a>
-          </div>
+        <div class="footer-links">
+          <a href="#" id="upgrade-link" class="upgrade-link">
+            <i class="fas fa-rocket"></i>
+            <span data-i18n="footer.upgrade">Upgrade Premium</span>
+          </a>
+          <a href="#" id="help-link">
+            <i class="fas fa-question-circle"></i>
+            <span data-i18n="footer.help">Ajuda</span>
+          </a>
         </div>
       </footer>
-
-      <script src="popup.js"></script>
     </div>
+
+    <!-- Add Org Modal -->
+    <div id="add-org-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 data-i18n="modal.addOrg.title">Adicionar Nova Org</h3>
+          <button class="btn-close" id="close-add-org">&times;</button>
+        </div>
+        <form id="add-org-form" class="modal-body">
+          <div class="form-group">
+            <label for="org-name" data-i18n="modal.addOrg.nameLabel"
+              >Nome da Org</label
+            >
+            <input
+              type="text"
+              id="org-name"
+              placeholder="Minha Org de Produção"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="org-url" data-i18n="modal.addOrg.urlLabel"
+              >URL da Org</label
+            >
+            <input
+              type="url"
+              id="org-url"
+              placeholder="https://mycompany.lightning.force.com"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="org-type" data-i18n="modal.addOrg.typeLabel"
+              >Tipo</label
+            >
+            <select id="org-type" required>
+              <option value="production" data-i18n="orgTypes.production">
+                Produção
+              </option>
+              <option value="sandbox" data-i18n="orgTypes.sandbox">
+                Sandbox
+              </option>
+              <option value="developer" data-i18n="orgTypes.developer">
+                Developer
+              </option>
+              <option value="trailhead" data-i18n="orgTypes.trailhead">
+                Trailhead
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="org-description" data-i18n="modal.addOrg.descLabel"
+              >Descrição (opcional)</label
+            >
+            <textarea
+              id="org-description"
+              placeholder="Descrição da org..."
+            ></textarea>
+          </div>
+        </form>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn-secondary"
+            id="cancel-add-org"
+            data-i18n="modal.addOrg.cancelBtn"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            form="add-org-form"
+            class="btn-primary"
+            id="save-org-btn"
+            data-i18n="modal.addOrg.saveBtn"
+          >
+            Salvar Org
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upgrade Modal -->
+    <div id="upgrade-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 data-i18n="modal.upgrade.title">Upgrade para Premium</h3>
+          <button class="btn-close" id="close-upgrade">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="upgrade-benefits">
+            <div class="benefit-item">
+              <i class="fas fa-infinity"></i>
+              <span data-i18n="modal.upgrade.unlimitedOrgs"
+                >Orgs ilimitadas</span
+              >
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-chart-bar"></i>
+              <span data-i18n="modal.upgrade.analytics"
+                >Analytics dashboard</span
+              >
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-moon"></i>
+              <span data-i18n="modal.upgrade.darkMode">Dark mode + temas</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-cloud"></i>
+              <span data-i18n="modal.upgrade.cloudSync">Sync na nuvem</span>
+            </div>
+          </div>
+          <div class="pricing-info">
+            <div class="price">
+              <span class="currency">R$</span>
+              <span class="amount">19</span>
+              <span class="period">/mês</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn-secondary"
+            id="maybe-later"
+            data-i18n="modal.upgrade.laterBtn"
+          >
+            Talvez mais tarde
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            id="upgrade-now"
+            data-i18n="modal.upgrade.upgradeBtn"
+          >
+            Fazer Upgrade
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 data-i18n="modal.settings.title">Configurações</h3>
+          <button class="btn-close" id="close-settings">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-section">
+            <h4 data-i18n="settings.general.title">Geral</h4>
+            <div class="setting-item">
+              <label for="language-select" data-i18n="settings.language"
+                >Idioma</label
+              >
+              <select id="language-select">
+                <option value="pt">🇧🇷 Português</option>
+                <option value="en">🇺🇸 English</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="theme-select" data-i18n="settings.theme">Tema</label>
+              <select id="theme-select">
+                <option value="light" data-i18n="settings.themes.light">
+                  Claro
+                </option>
+                <option value="dark" data-i18n="settings.themes.dark">
+                  Escuro
+                </option>
+                <option value="auto" data-i18n="settings.themes.auto">
+                  Automático
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-section premium-only" style="display: none">
+            <h4 data-i18n="settings.premium.title">Premium</h4>
+            <div class="setting-item">
+              <label>
+                <input type="checkbox" id="cloud-sync-enabled" />
+                <span data-i18n="settings.cloudSync"
+                  >Sincronização na nuvem</span
+                >
+              </label>
+            </div>
+            <div class="setting-item">
+              <label>
+                <input type="checkbox" id="auto-backup-enabled" />
+                <span data-i18n="settings.autoBackup">Backup automático</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h4 data-i18n="settings.about.title">Sobre</h4>
+            <div class="about-info">
+              <p><strong>Versão:</strong> 1.0.0</p>
+              <p>
+                <strong>Plano:</strong> <span id="current-plan">Grátis</span>
+              </p>
+              <div class="about-links">
+                <a href="#" id="view-changelog" data-i18n="settings.changelog"
+                  >Ver changelog</a
+                >
+                <a href="#" id="contact-support" data-i18n="settings.support"
+                  >Suporte</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none">
+      <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span data-i18n="loading">Carregando...</span>
+      </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <!-- Scripts -->
+    <script src="../translations/translations.js"></script>
+    <script src="../shared/config.js"></script>
+    <script src="popup.js"></script>
   </body>
 </html>

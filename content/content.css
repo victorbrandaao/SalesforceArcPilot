@@ -1,0 +1,23 @@
+/* Styles for content script elements */
+#arc-pilot-quick-access {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+#arc-pilot-quick-access:hover {
+  transform: scale(1.1) !important;
+}
+
+#arc-pilot-org-switcher {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+#arc-pilot-org-switcher * {
+  box-sizing: border-box !important;
+}
+
+/* Ensure our elements don't inherit Salesforce styles */
+#arc-pilot-quick-access,
+#arc-pilot-org-switcher {
+  all: initial !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}

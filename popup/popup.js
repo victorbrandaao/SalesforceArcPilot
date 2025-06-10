@@ -1,1014 +1,610 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // === MODERN UI COMPONENTS ===
-  const statusIndicator = document.getElementById("status-indicator");
-  const statusText = document.getElementById("status-text");
-  const cliStatusIndicator = document.getElementById("cli-status");
-  const cliStatusText = document.getElementById("cli-status-text");
-  const searchInput = document.getElementById("search-orgs");
-  const filterButtons = document.querySelectorAll(".filter-button");
-  const refreshAllBtn = document.getElementById("refresh-all");
-  const settingsBtn = document.getElementById("settings-btn");
-  const settingsModal = document.getElementById("settings-modal");
-  const closeSettingsBtn = document.getElementById("close-settings");
-  const toastContainer = document.getElementById("toast-container");
-  const toggleFormBtn = document.getElementById("toggle-form");
-  const manualOrgForm = document.getElementById("manual-org-form");
+  class SalesforceArcPilot {
+    constructor() {
+      this.currentLang = "pt";
+      this.currentTheme = "light";
+      this.subscription = { plan: "free", features: { maxOrgs: 2 } };
+      this.orgs = [];
+      this.init();
+    }
 
-  // === EXISTING COMPONENTS ===
-  const orgListDiv = document.querySelector("#org-list.manual-list");
-  const noOrgsMessage = document.getElementById("no-orgs-message");
-  const addOrgBtn = document.getElementById("add-org-btn");
-  const orgAliasInput = document.getElementById("org-alias");
-  const orgUrlInput = document.getElementById("org-url");
-  const cliOrgListDiv = document.getElementById("cli-org-list");
-  const noCliOrgsMessage = document.getElementById("no-cli-orgs-message");
-  const refreshCliOrgsBtn = document.getElementById("refresh-cli-orgs-btn");
-
-  // === PIX DONATION COMPONENTS ===
-  const toggleDonationBtn = document.getElementById("toggle-donation");
-  const donationContent = document.getElementById("donation-content");
-  const pixKey = document.getElementById("pix-key");
-  const copyPixBtn = document.querySelector("[data-action='copy-pix']");
-  const amountButtons = document.querySelectorAll(".amount-btn");
-
-  // === ANALYTICS DATA ===
-  let analyticsData = {
-    totalOpens: 0,
-    cliOpens: 0,
-    manualOpens: 0,
-    lastUsed: null,
-    favoriteOrg: null,
-  };
-
-  // === INITIALIZATION ===
-  initializeUI();
-  loadAnalytics();
-  loadManualOrgs();
-  checkServerHealth();
-  initializeBackgroundCommunication();
-  initializePIXDonation();
-  initializePIXModal();
-
-  // === BACKGROUND SERVICE WORKER INTEGRATION ===
-  function initializeBackgroundCommunication() {
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      if (request.action === "refreshOrgs") {
-        loadCliOrgs();
-        loadManualOrgs();
-      }
-    });
-  }
-
-  function sendNotification(title, message) {
-    chrome.runtime.sendMessage({
-      action: "showNotification",
-      title: title,
-      message: message,
-    });
-  }
-
-  // === UTILITY FUNCTIONS ===
-
-  // Toast notification system
-  function showToast(message, type = "info", duration = 3000) {
-    const toast = document.createElement("div");
-    toast.className = `toast toast-${type}`;
-
-    const icon = type === "success" ? "✓" : type === "error" ? "✗" : "ⓘ";
-    toast.innerHTML = `
-      <span class="toast-icon">${icon}</span>
-      <span class="toast-message">${message}</span>
-      <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-    `;
-
-    toastContainer.appendChild(toast);
-
-    // Auto remove after duration
-    setTimeout(() => {
-      if (toast.parentElement) {
-        toast.remove();
-      }
-    }, duration);
-  }
-
-  // Status indicator management
-  function updateStatus(status = "connected") {
-    if (statusIndicator) {
-      const statusDot = statusIndicator.querySelector(".status-dot");
-      if (statusDot) {
-        statusDot.className = `status-dot ${
-          status === "connected"
-            ? "online"
-            : status === "loading"
-            ? "checking"
-            : "error"
-        }`;
-      }
-
-      if (statusText) {
-        statusText.textContent =
-          status === "connected"
-            ? "Conectado"
-            : status === "loading"
-            ? "Verificando..."
-            : "Desconectado";
+    async init() {
+      try {
+        await this.loadSettings();
+        await this.loadSubscription();
+        await this.loadOrgs();
+        this.setupEventListeners();
+        this.updateUI();
+        this.setupTheme();
+        console.log("✅ Salesforce Arc Pilot initialized");
+      } catch (error) {
+        console.error("❌ Error initializing app:", error);
+        this.showNotification("Erro ao inicializar aplicação", "error");
       }
     }
 
-    if (cliStatusIndicator) {
-      const cliStatusDot = cliStatusIndicator.querySelector(".status-dot");
-      if (cliStatusDot) {
-        cliStatusDot.className = `status-dot ${
-          status === "connected"
-            ? "online"
-            : status === "loading"
-            ? "checking"
-            : "error"
-        }`;
-      }
-    }
-  }
+    async loadSettings() {
+      const settings = await chrome.storage.sync.get(["language", "theme"]);
+      this.currentLang = settings.language || "pt";
+      this.currentTheme = settings.theme || "light";
 
-  // Analytics functions
-  function loadAnalytics() {
-    chrome.storage.local.get(["sfArcPilotAnalytics"], (result) => {
-      if (result.sfArcPilotAnalytics) {
-        analyticsData = { ...analyticsData, ...result.sfArcPilotAnalytics };
-        updateAnalyticsDisplay();
-      }
-    });
-  }
+      // Update language select
+      const langSelect = document.getElementById("language-select");
+      if (langSelect) langSelect.value = this.currentLang;
 
-  function saveAnalytics() {
-    chrome.storage.local.set({ sfArcPilotAnalytics: analyticsData });
-  }
-
-  function updateAnalyticsDisplay() {
-    const totalOpensEl = document.getElementById("total-opens");
-    const cliOpensEl = document.getElementById("cli-opens");
-    const manualOpensEl = document.getElementById("manual-opens");
-    const lastUsedEl = document.getElementById("last-used");
-
-    if (totalOpensEl) totalOpensEl.textContent = analyticsData.totalOpens;
-    if (cliOpensEl) cliOpensEl.textContent = analyticsData.cliOpens;
-    if (manualOpensEl) manualOpensEl.textContent = analyticsData.manualOpens;
-    if (lastUsedEl) {
-      lastUsedEl.textContent = analyticsData.lastUsed
-        ? new Date(analyticsData.lastUsed).toLocaleDateString("pt-BR")
-        : "Nunca";
-    }
-  }
-
-  function trackOrgOpen(type, orgIdentifier) {
-    analyticsData.totalOpens++;
-    analyticsData.lastUsed = new Date().toISOString();
-
-    if (type === "cli") {
-      analyticsData.cliOpens++;
-    } else {
-      analyticsData.manualOpens++;
+      // Update theme select
+      const themeSelect = document.getElementById("theme-select");
+      if (themeSelect) themeSelect.value = this.currentTheme;
     }
 
-    saveAnalytics();
-    updateAnalyticsDisplay();
-  }
-
-  // Initialize UI and load translated texts
-  function initializeUI() {
-    // Load translated texts
-    document.getElementById("main-title").textContent =
-      chrome.i18n.getMessage("appName");
-    document.getElementById("cli-orgs-section-title").textContent =
-      chrome.i18n.getMessage("cliOrgsSectionTitle");
-
-    if (noCliOrgsMessage)
-      noCliOrgsMessage.textContent =
-        chrome.i18n.getMessage("noCliOrgsAvailable");
-
-    // Setup refresh button with correct SVG handling
-    if (refreshCliOrgsBtn) {
-      const refreshIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`;
-      const refreshText = chrome.i18n.getMessage("refreshCliOrgsButton");
-      refreshCliOrgsBtn.innerHTML = refreshIcon + " " + refreshText;
-    }
-
-    document.getElementById("add-org-section-title").textContent =
-      chrome.i18n.getMessage("addOrgSectionTitle");
-    if (orgAliasInput)
-      orgAliasInput.placeholder = chrome.i18n.getMessage("orgAliasPlaceholder");
-    if (orgUrlInput)
-      orgUrlInput.placeholder = chrome.i18n.getMessage("orgUrlPlaceholder");
-    if (addOrgBtn)
-      addOrgBtn.textContent = chrome.i18n.getMessage("addOrgButton");
-    if (noOrgsMessage)
-      noOrgsMessage.textContent = chrome.i18n.getMessage("noOrgsAdded");
-
-    // Setup search functionality
-    if (searchInput) {
-      searchInput.addEventListener("input", handleSearch);
-      searchInput.placeholder =
-        chrome.i18n.getMessage("searchPlaceholder") ||
-        "🔍 Buscar organizações...";
-    }
-
-    // Setup filter buttons
-    filterButtons.forEach((button) => {
-      button.addEventListener("click", handleFilter);
-    });
-
-    // Setup form toggle
-    if (toggleFormBtn && manualOrgForm) {
-      toggleFormBtn.addEventListener("click", () => {
-        const isHidden = manualOrgForm.style.display === "none";
-        manualOrgForm.style.display = isHidden ? "block" : "none";
-        toggleFormBtn.textContent = isHidden
-          ? chrome.i18n.getMessage("hideForm") || "Ocultar Formulário"
-          : chrome.i18n.getMessage("showForm") || "Adicionar Org Manual";
-      });
-    }
-
-    // Setup modal controls
-    if (settingsBtn && settingsModal) {
-      settingsBtn.addEventListener("click", () => {
-        settingsModal.style.display = "flex";
-      });
-    }
-
-    if (closeSettingsBtn && settingsModal) {
-      closeSettingsBtn.addEventListener("click", () => {
-        settingsModal.style.display = "none";
-      });
-    }
-
-    // Setup refresh all button
-    if (refreshAllBtn) {
-      refreshAllBtn.addEventListener("click", () => {
-        updateStatus("loading");
-        loadCliOrgs();
-        loadManualOrgs();
-        showToast(
-          chrome.i18n.getMessage("refreshingAll") ||
-            "Atualizando todas as orgs...",
-          "info"
-        );
-      });
-    }
-
-    // Setup event listeners
-    if (refreshCliOrgsBtn)
-      refreshCliOrgsBtn.addEventListener("click", loadCliOrgs);
-    if (addOrgBtn) addOrgBtn.addEventListener("click", handleAddOrg);
-
-    // Setup donation section
-    if (toggleDonationBtn && donationContent) {
-      toggleDonationBtn.addEventListener("click", () => {
-        const isCollapsed = donationContent.classList.contains("collapsed");
-        donationContent.classList.toggle("collapsed");
-
-        // Rotate arrow icon
-        const icon = toggleDonationBtn.querySelector("svg");
-        if (icon) {
-          icon.style.transform = isCollapsed
-            ? "rotate(0deg)"
-            : "rotate(180deg)";
-        }
-      });
-    }
-
-    // Setup PIX copy functionality
-    if (copyPixBtn && pixKey) {
-      copyPixBtn.addEventListener("click", () => {
-        copyToClipboard(pixKey.value);
-        showToast("Chave PIX copiada! 💚", "success", 3000);
-
-        // Track donation interest
-        analyticsData.donationInterest =
-          (analyticsData.donationInterest || 0) + 1;
-        saveAnalytics();
-      });
-    }
-
-    // Setup amount buttons
-    amountButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const amount = button.dataset.amount;
-        showToast(
-          "Valor sugerido: R$ " + amount + " - Use a chave PIX acima!",
-          "info",
-          5000
-        );
-
-        // Track preferred amounts
-        analyticsData.preferredAmount = amount;
-        saveAnalytics();
-
-        // Highlight the PIX key
-        if (pixKey) {
-          pixKey.select();
-          pixKey.focus();
-        }
-      });
-    });
-
-    // Search and filter functionality
-    function handleSearch() {
-      const searchTerm = searchInput.value.toLowerCase();
-      const allOrgItems = document.querySelectorAll(".org-item");
-
-      allOrgItems.forEach((item) => {
-        const alias =
-          item.querySelector(".alias")?.textContent.toLowerCase() || "";
-        const url = item.querySelector(".url")?.textContent.toLowerCase() || "";
-        const username =
-          item.querySelector(".username")?.textContent.toLowerCase() || "";
-
-        const matches =
-          alias.includes(searchTerm) ||
-          url.includes(searchTerm) ||
-          username.includes(searchTerm);
-        item.style.display = matches ? "flex" : "none";
-      });
-    }
-
-    function handleFilter(event) {
-      const filterType = event.target.dataset.filter;
-
-      // Update active filter button
-      filterButtons.forEach((btn) => btn.classList.remove("active"));
-      event.target.classList.add("active");
-
-      const allOrgItems = document.querySelectorAll(".org-item");
-
-      allOrgItems.forEach((item) => {
-        let shouldShow = true;
-
-        switch (filterType) {
-          case "all":
-            shouldShow = true;
-            break;
-          case "cli":
-            shouldShow = item.classList.contains("cli-item");
-            break;
-          case "manual":
-            shouldShow = item.classList.contains("manual-item");
-            break;
-          case "favorites":
-            shouldShow = item
-              .querySelector(".favorite-btn")
-              ?.classList.contains("active");
-            break;
-        }
-
-        item.style.display = shouldShow ? "flex" : "none";
-      });
-    }
-
-    // Enhanced add org function
-    function handleAddOrg() {
-      const alias = orgAliasInput?.value.trim();
-      const url = orgUrlInput?.value.trim();
-
-      if (!alias || !url) {
-        showToast(chrome.i18n.getMessage("fillFieldsAlert"), "error");
-        return;
-      }
-
-      // Validate URL format
-      if (
-        !url.includes("salesforce.com") &&
-        !url.includes("lightning.force.com")
-      ) {
-        showToast("URL deve ser um domínio Salesforce válido", "error");
-        return;
-      }
-
-      chrome.storage.sync.get(["salesforceOrgs"], (result) => {
-        const orgs = result.salesforceOrgs || [];
-
-        // Check for duplicates
-        const existingOrg = orgs.find(
-          (org) => org.alias === alias || org.url === url
-        );
-        if (existingOrg) {
-          showToast("Org com este alias ou URL já existe", "error");
-          return;
-        }
-
-        orgs.push({
-          alias,
-          url: url.startsWith("https://") ? url : "https://" + url,
-          createdAt: new Date().toISOString(),
-          isFavorite: false,
+    async loadSubscription() {
+      try {
+        const response = await chrome.runtime.sendMessage({
+          type: "GET_SUBSCRIPTION",
         });
-
-        chrome.storage.sync.set({ salesforceOrgs: orgs }, () => {
-          orgAliasInput.value = "";
-          orgUrlInput.value = "";
-          loadManualOrgs();
-          showToast('Org "' + alias + '" adicionada com sucesso!', "success");
-        });
-      });
+        this.subscription = response || {
+          plan: "free",
+          features: { maxOrgs: 2 },
+        };
+        this.updateSubscriptionStatus();
+      } catch (error) {
+        console.error("Error loading subscription:", error);
+      }
     }
-  }
 
-  // Enhanced manual orgs loading
-  function loadManualOrgs() {
-    chrome.storage.sync.get(["salesforceOrgs"], (result) => {
-      const orgs = result.salesforceOrgs || [];
+    async loadOrgs() {
+      try {
+        const data = await chrome.storage.sync.get(["orgs"]);
+        this.orgs = data.orgs || [];
+        this.updateOrgsList();
+        this.updateOrgCount();
+      } catch (error) {
+        console.error("Error loading orgs:", error);
+      }
+    }
 
-      if (!orgListDiv) return;
+    setupEventListeners() {
+      // Search functionality
+      const searchInput = document.getElementById("search-input");
+      searchInput.addEventListener("input", (e) =>
+        this.handleSearch(e.target.value)
+      );
 
-      orgListDiv.innerHTML = "";
+      // Clear search
+      document.getElementById("clear-search").addEventListener("click", () => {
+        searchInput.value = "";
+        this.handleSearch("");
+      });
 
-      if (orgs.length === 0) {
-        if (noOrgsMessage) noOrgsMessage.style.display = "block";
+      // Add org buttons
+      document
+        .getElementById("add-org-btn")
+        .addEventListener("click", () => this.openAddOrgModal());
+      document
+        .getElementById("add-first-org")
+        .addEventListener("click", () => this.openAddOrgModal());
+
+      // Modal controls
+      document
+        .getElementById("close-add-org")
+        .addEventListener("click", () => this.closeModal("add-org-modal"));
+      document
+        .getElementById("cancel-add-org")
+        .addEventListener("click", () => this.closeModal("add-org-modal"));
+      document
+        .getElementById("close-upgrade")
+        .addEventListener("click", () => this.closeModal("upgrade-modal"));
+      document
+        .getElementById("maybe-later")
+        .addEventListener("click", () => this.closeModal("upgrade-modal"));
+      document
+        .getElementById("close-settings")
+        .addEventListener("click", () => this.closeModal("settings-modal"));
+
+      // Form submission
+      document
+        .getElementById("add-org-form")
+        .addEventListener("submit", (e) => this.handleAddOrg(e));
+
+      // Settings
+      document
+        .getElementById("settings-btn")
+        .addEventListener("click", () => this.openModal("settings-modal"));
+      document
+        .getElementById("theme-toggle")
+        .addEventListener("click", () => this.toggleTheme());
+      document
+        .getElementById("language-select")
+        .addEventListener("change", (e) => this.changeLanguage(e.target.value));
+      document
+        .getElementById("theme-select")
+        .addEventListener("change", (e) => this.changeTheme(e.target.value));
+
+      // Upgrade
+      document
+        .getElementById("upgrade-link")
+        .addEventListener("click", () => this.openModal("upgrade-modal"));
+      document
+        .getElementById("upgrade-now")
+        .addEventListener("click", () => this.redirectToUpgrade());
+
+      // Help and support
+      document
+        .getElementById("help-link")
+        .addEventListener("click", () => this.openHelpPage());
+      document
+        .getElementById("contact-support")
+        .addEventListener("click", () => this.contactSupport());
+
+      // Sync button (premium only)
+      const syncBtn = document.getElementById("sync-btn");
+      if (syncBtn) {
+        syncBtn.addEventListener("click", () => this.syncOrgs());
+      }
+    }
+
+    updateUI() {
+      // Update empty state visibility
+      const emptyState = document.getElementById("empty-state");
+      const orgsList = document.getElementById("orgs-list");
+
+      if (this.orgs.length === 0) {
+        emptyState.style.display = "block";
+        orgsList.style.display = "none";
       } else {
-        if (noOrgsMessage) noOrgsMessage.style.display = "none";
-
-        orgs.forEach((org, index) => {
-          const orgItem = document.createElement("div");
-          orgItem.className = "org-item manual-item";
-
-          const favoriteClass = org.isFavorite ? "active" : "";
-          const favoriteIcon = org.isFavorite ? "★" : "☆";
-
-          const createdAtText = org.createdAt
-            ? '<span class="org-meta">Adicionada em ' +
-              new Date(org.createdAt).toLocaleDateString("pt-BR") +
-              "</span>"
-            : "";
-
-          const copyIcon =
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-
-          const openIcon =
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>';
-
-          const deleteIcon =
-            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
-
-          orgItem.innerHTML = `
-            <div class="org-info">
-              <div class="org-header">
-                <span class="alias">${org.alias}</span>
-                <button class="favorite-btn ${favoriteClass}" data-action="toggle-favorite-manual" data-index="${index}">
-                  ${favoriteIcon}
-                </button>
-              </div>
-              <span class="url">${org.url}</span>
-              ${createdAtText}
-            </div>
-            <div class="org-actions">
-              <button data-action="copy-url" data-url="${
-                org.url
-              }" class="action-btn" title="Copiar URL">
-                ${copyIcon}
-              </button>
-              <button data-action="open-manual" data-url="${
-                org.url
-              }" data-alias="${org.alias}" class="open-btn primary">
-                ${openIcon}
-                ${chrome.i18n.getMessage("openButton")}
-              </button>
-              <button data-action="delete-manual" data-index="${index}" class="delete-btn" title="Excluir">
-                ${deleteIcon}
-              </button>
-            </div>
-          `;
-
-          orgListDiv.appendChild(orgItem);
-        });
-
-        // Enhanced event listeners
-        orgListDiv.querySelectorAll("button").forEach((button) => {
-          button.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const action = e.currentTarget.dataset.action;
-            const url = e.currentTarget.dataset.url;
-            const alias = e.currentTarget.dataset.alias;
-            const index = parseInt(e.currentTarget.dataset.index);
-
-            switch (action) {
-              case "open-manual":
-                openOrgManually(url, alias);
-                break;
-              case "delete-manual":
-                deleteManualOrg(index);
-                break;
-              case "copy-url":
-                copyToClipboard(url);
-                break;
-              case "toggle-favorite-manual":
-                toggleFavorite("manual", index);
-                break;
-            }
-          });
-        });
+        emptyState.style.display = "none";
+        orgsList.style.display = "block";
       }
-    });
-  }
 
-  // Enhanced CLI orgs loading
-  function loadCliOrgs() {
-    updateStatus("loading");
+      // Update sync button visibility (premium feature)
+      const syncBtn = document.getElementById("sync-btn");
+      if (syncBtn) {
+        syncBtn.style.display = this.subscription.features.cloudSync
+          ? "flex"
+          : "none";
+      }
 
-    if (!refreshCliOrgsBtn || !cliOrgListDiv) return;
+      // Update premium-only sections
+      const premiumSections = document.querySelectorAll(".premium-only");
+      premiumSections.forEach((section) => {
+        section.style.display =
+          this.subscription.plan === "premium" ? "block" : "none";
+      });
 
-    // Add loading state to refresh button
-    refreshCliOrgsBtn.classList.add("loading");
-    refreshCliOrgsBtn.disabled = true;
+      // Update current plan display
+      const currentPlanElement = document.getElementById("current-plan");
+      if (currentPlanElement) {
+        currentPlanElement.textContent =
+          this.subscription.plan === "premium" ? "Premium" : "Grátis";
+      }
+    }
 
-    // Show loading skeleton
-    cliOrgListDiv.innerHTML = `
-      <div class="loading-skeleton">
-        <div class="skeleton-item">
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line short"></div>
-        </div>
-        <div class="skeleton-item">
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line short"></div>
-        </div>
-        <div class="skeleton-item">
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line short"></div>
-        </div>
-      </div>
-    `;
+    updateSubscriptionStatus() {
+      const container = document.getElementById("subscription-status");
+      const plan = this.subscription.plan;
+      const features = this.subscription.features;
 
-    if (noCliOrgsMessage) noCliOrgsMessage.style.display = "none";
-
-    fetch("http://localhost:3000/list-orgs")
-      .then((response) => {
-        if (!response.ok) {
-          return response.json().then((errorData) => {
-            throw new Error(
-              errorData.message || "Erro desconhecido do servidor local."
-            );
-          });
-        }
-        return response.json();
-      })
-      .then((data) => {
-        // Remove loading state
-        refreshCliOrgsBtn.classList.remove("loading");
-        refreshCliOrgsBtn.disabled = false;
-        updateStatus("connected");
-
-        if (data.success) {
-          const cliOrgs = data.orgs || [];
-          cliOrgListDiv.innerHTML = "";
-
-          if (cliOrgs.length === 0) {
-            if (noCliOrgsMessage) noCliOrgsMessage.style.display = "block";
-          } else {
-            if (noCliOrgsMessage) noCliOrgsMessage.style.display = "none";
-
-            cliOrgs.forEach((org, index) => {
-              const orgItem = document.createElement("div");
-              orgItem.className = "org-item cli-item";
-
-              const defaultClass = org.isDefault ? " default-org" : "";
-              const orgIcon = org.isDefault ? "⚡" : "🏢";
-              const statusBadge = org.isDefault
-                ? '<span class="org-badge default">Default</span>'
-                : "";
-
-              const copyIcon =
-                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-
-              const openIcon =
-                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>';
-
-              orgItem.innerHTML = `
-                <div class="org-info${defaultClass}">
-                  <div class="org-header">
-                    <span class="alias">${orgIcon} ${org.alias}</span>
-                    ${statusBadge}
-                  </div>
-                  <span class="username">${org.username}</span>
-                  <span class="url">${org.instanceUrl}</span>
-                  <span class="org-meta">Via Salesforce CLI</span>
+      container.className = `subscription-status subscription-${plan}`;
+      container.innerHTML = `
+            <div class="subscription-info">
+                <div class="plan-info">
+                    <h4>${
+                      plan === "premium" ? "💎 Premium" : "🆓 Plano Grátis"
+                    }</h4>
+                    <div class="plan-features">
+                        ${
+                          features.maxOrgs === 999
+                            ? "Orgs ilimitadas"
+                            : `Até ${features.maxOrgs} orgs`
+                        } • 
+                        ${features.analytics ? "Analytics" : "Sem analytics"} • 
+                        ${features.darkMode ? "Dark mode" : "Tema claro"}
+                    </div>
                 </div>
-                <div class="org-actions">
-                  <button data-action="copy-url" data-url="${
-                    org.instanceUrl
-                  }" class="action-btn" title="Copiar URL">
-                    ${copyIcon}
-                  </button>
-                  <button data-action="open-cli" data-alias="${
-                    org.alias || org.username
-                  }" class="open-btn primary">
-                    ${openIcon}
-                    ${chrome.i18n.getMessage("openButton")}
-                  </button>
-                </div>
-              `;
-
-              cliOrgListDiv.appendChild(orgItem);
-            });
-
-            // Enhanced event listeners for CLI orgs
-            cliOrgListDiv.querySelectorAll("button").forEach((button) => {
-              button.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const action = e.currentTarget.dataset.action;
-                const alias = e.currentTarget.dataset.alias;
-                const url = e.currentTarget.dataset.url;
-
-                switch (action) {
-                  case "open-cli":
-                    openOrgViaCli(alias);
-                    break;
-                  case "copy-url":
-                    copyToClipboard(url);
-                    break;
+                ${
+                  plan === "free"
+                    ? '<div class="upgrade-badge" id="upgrade-badge">Upgrade</div>'
+                    : ""
                 }
-              });
-            });
-          }
+            </div>
+        `;
 
-          showToast(cliOrgs.length + " orgs CLI carregadas", "success", 2000);
-        } else {
-          if (noCliOrgsMessage) {
-            noCliOrgsMessage.style.display = "block";
-            noCliOrgsMessage.textContent = chrome.i18n.getMessage(
-              "cliListError",
-              [data.message]
-            );
-          }
-          console.error("Erro ao listar Orgs do CLI:", data.message);
-          updateStatus("error");
-        }
-      })
-      .catch((error) => {
-        // Remove loading state
-        refreshCliOrgsBtn.classList.remove("loading");
-        refreshCliOrgsBtn.disabled = false;
-        updateStatus("error");
+      // Add upgrade click handler
+      const upgradeBadge = document.getElementById("upgrade-badge");
+      if (upgradeBadge) {
+        upgradeBadge.addEventListener("click", () =>
+          this.openModal("upgrade-modal")
+        );
+      }
+    }
 
-        cliOrgListDiv.innerHTML = "";
-        if (noCliOrgsMessage) {
-          noCliOrgsMessage.style.display = "block";
-          if (error.message.includes("Failed to fetch")) {
-            noCliOrgsMessage.textContent = chrome.i18n.getMessage(
-              "serverNotRunningError"
-            );
-            showToast("Servidor local não está rodando", "error");
-          } else {
-            noCliOrgsMessage.textContent = chrome.i18n.getMessage(
-              "serverCommunicationError",
-              [error.message]
-            );
-            showToast("Erro ao comunicar com servidor local", "error");
-          }
-        }
-        console.error("Erro ao carregar Orgs do CLI:", error);
-      });
-  }
+    updateOrgsList() {
+      const container = document.getElementById("orgs-list");
+      const searchTerm = document
+        .getElementById("search-input")
+        .value.toLowerCase();
 
-  // Server health check
-  async function checkServerHealth() {
-    updateStatus("loading");
-
-    try {
-      // Check server health first
-      const healthResponse = await fetch("http://localhost:3000/health", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!healthResponse.ok) {
-        throw new Error("Servidor não está respondendo");
+      let filteredOrgs = this.orgs;
+      if (searchTerm) {
+        filteredOrgs = this.orgs.filter(
+          (org) =>
+            org.name.toLowerCase().includes(searchTerm) ||
+            org.url.toLowerCase().includes(searchTerm) ||
+            org.type.toLowerCase().includes(searchTerm)
+        );
       }
 
-      // Check CLI info with increased timeout (15 seconds instead of 10)
-      const cliResponse = await fetch("http://localhost:3000/cli-info", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      container.innerHTML = filteredOrgs
+        .map(
+          (org) => `
+            <div class="org-card" onclick="app.accessOrg('${org.id}')">
+                <div class="org-header">
+                    <div class="org-icon ${org.type}">
+                        <i class="fas fa-${this.getOrgIcon(org.type)}"></i>
+                    </div>
+                    <div class="org-info">
+                        <div class="org-name">${org.name}</div>
+                        <div class="org-url">${this.truncateUrl(org.url)}</div>
+                    </div>
+                    <div class="org-actions">
+                        <button class="org-action-btn" onclick="event.stopPropagation(); app.editOrg('${
+                          org.id
+                        }')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="org-action-btn delete" onclick="event.stopPropagation(); app.deleteOrg('${
+                          org.id
+                        }')" title="Deletar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="org-footer">
+                    <span class="org-type-badge ${
+                      org.type
+                    }">${this.getOrgTypeLabel(org.type)}</span>
+                    ${
+                      org.lastAccessed
+                        ? `<span>Último acesso: ${this.formatDate(
+                            org.lastAccessed
+                          )}</span>`
+                        : ""
+                    }
+                </div>
+            </div>
+        `
+        )
+        .join("");
+    }
 
-      const cliData = await cliResponse.json();
+    updateOrgCount() {
+      const countElement = document.getElementById("org-count");
+      const maxOrgs = this.subscription.features.maxOrgs;
+      const current = this.orgs.length;
 
-      if (cliData.success && cliData.cliInstalled) {
-        updateStatus("connected");
-        // Now load CLI orgs since server and CLI are healthy
-        loadCliOrgs();
+      countElement.textContent = `${current}/${
+        maxOrgs === 999 ? "∞" : maxOrgs
+      }`;
+
+      // Update add button state
+      const addBtn = document.getElementById("add-org-btn");
+      if (current >= maxOrgs) {
+        addBtn.innerHTML =
+          '<i class="fas fa-lock"></i><span>Upgrade para mais</span>';
+        addBtn.onclick = () => this.openModal("upgrade-modal");
       } else {
-        updateStatus("error");
-        showToast("CLI do Salesforce não foi detectado", "warning");
+        addBtn.innerHTML =
+          '<i class="fas fa-plus"></i><span>Adicionar Org</span>';
+        addBtn.onclick = () => this.openAddOrgModal();
       }
-    } catch (error) {
-      updateStatus("error");
-      console.error("Erro ao verificar saúde do servidor:", error);
+    }
 
-      if (error.message.includes("Failed to fetch")) {
-        showToast("Servidor local não está rodando", "error");
+    async handleAddOrg(event) {
+      event.preventDefault();
+
+      // Check org limit
+      if (this.orgs.length >= this.subscription.features.maxOrgs) {
+        this.openModal("upgrade-modal");
+        return;
+      }
+
+      const formData = new FormData(event.target);
+      const org = {
+        id: Date.now().toString(),
+        name: formData.get("name") || document.getElementById("org-name").value,
+        url: formData.get("url") || document.getElementById("org-url").value,
+        type: formData.get("type") || document.getElementById("org-type").value,
+        description:
+          formData.get("description") ||
+          document.getElementById("org-description").value,
+        addedAt: new Date().toISOString(),
+        lastAccessed: null,
+      };
+
+      try {
+        this.showLoading(true);
+
+        // Validate URL
+        new URL(org.url);
+
+        this.orgs.push(org);
+        await chrome.storage.sync.set({ orgs: this.orgs });
+
+        this.updateOrgsList();
+        this.updateOrgCount();
+        this.updateUI();
+        this.closeModal("add-org-modal");
+
+        this.showNotification(
+          `Org "${org.name}" adicionada com sucesso!`,
+          "success"
+        );
+
+        // Clear form
+        document.getElementById("add-org-form").reset();
+
+        // Track event
+        this.trackEvent("org_added", { type: org.type });
+      } catch (error) {
+        console.error("Error adding org:", error);
+        this.showNotification(
+          "Erro ao adicionar org. Verifique a URL.",
+          "error"
+        );
+      } finally {
+        this.showLoading(false);
+      }
+    }
+
+    async accessOrg(orgId) {
+      const org = this.orgs.find((o) => o.id === orgId);
+      if (!org) return;
+
+      try {
+        // Update last accessed time
+        org.lastAccessed = new Date().toISOString();
+        await chrome.storage.sync.set({ orgs: this.orgs });
+
+        // Open org in new tab
+        await chrome.tabs.create({ url: org.url });
+
+        // Track analytics (if premium)
+        if (this.subscription.features.analytics) {
+          this.trackOrgAccess(org);
+        }
+
+        // Update UI
+        this.updateOrgsList();
+
+        this.showNotification(`Abrindo ${org.name}...`, "success");
+
+        // Close popup
+        window.close();
+      } catch (error) {
+        console.error("Error accessing org:", error);
+        this.showNotification("Erro ao acessar org", "error");
+      }
+    }
+
+    async deleteOrg(orgId) {
+      const org = this.orgs.find((o) => o.id === orgId);
+      if (!org) return;
+
+      if (confirm(`Tem certeza que deseja deletar "${org.name}"?`)) {
+        try {
+          this.orgs = this.orgs.filter((o) => o.id !== orgId);
+          await chrome.storage.sync.set({ orgs: this.orgs });
+
+          this.updateOrgsList();
+          this.updateOrgCount();
+          this.updateUI();
+
+          this.showNotification(`Org "${org.name}" deletada`, "success");
+          this.trackEvent("org_deleted", { type: org.type });
+        } catch (error) {
+          console.error("Error deleting org:", error);
+          this.showNotification("Erro ao deletar org", "error");
+        }
+      }
+    }
+
+    handleSearch(term) {
+      const clearBtn = document.getElementById("clear-search");
+      clearBtn.style.display = term ? "flex" : "none";
+      this.updateOrgsList();
+      this.trackEvent("search_performed", { term: term.length });
+    }
+
+    setupTheme() {
+      document.body.setAttribute("data-theme", this.currentTheme);
+
+      const themeIcon = document.querySelector("#theme-toggle i");
+      themeIcon.className =
+        this.currentTheme === "dark" ? "fas fa-sun" : "fas fa-moon";
+    }
+
+    async toggleTheme() {
+      const newTheme = this.currentTheme === "light" ? "dark" : "light";
+      await this.changeTheme(newTheme);
+    }
+
+    async changeTheme(theme) {
+      this.currentTheme = theme;
+      await chrome.storage.sync.set({ theme });
+      this.setupTheme();
+      this.trackEvent("theme_changed", { theme });
+    }
+
+    async changeLanguage(lang) {
+      this.currentLang = lang;
+      await chrome.storage.sync.set({ language: lang });
+      // Note: Full translation would require page reload in a real implementation
+      this.trackEvent("language_changed", { language: lang });
+    }
+
+    openModal(modalId) {
+      document.getElementById(modalId).classList.add("active");
+      this.trackEvent("modal_opened", { modal: modalId });
+    }
+
+    closeModal(modalId) {
+      document.getElementById(modalId).classList.remove("active");
+    }
+
+    openAddOrgModal() {
+      if (this.orgs.length >= this.subscription.features.maxOrgs) {
+        this.openModal("upgrade-modal");
       } else {
-        showToast("Erro ao comunicar com servidor local", "error");
+        this.openModal("add-org-modal");
       }
     }
-  }
 
-  // Enhanced utility functions
-  function copyToClipboard(text) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        showToast("URL copiada para a área de transferência!", "success", 2000);
-      })
-      .catch(() => {
-        showToast("Erro ao copiar URL", "error");
+    redirectToUpgrade() {
+      chrome.tabs.create({
+        url: "https://victorbrandaao.github.io/salesforce-arc-pilot-landing/#pricing",
       });
-  }
-
-  function toggleFavorite(type, index) {
-    if (type === "manual") {
-      chrome.storage.sync.get(["salesforceOrgs"], (result) => {
-        const orgs = result.salesforceOrgs || [];
-        if (orgs[index]) {
-          orgs[index].isFavorite = !orgs[index].isFavorite;
-          chrome.storage.sync.set({ salesforceOrgs: orgs }, () => {
-            loadManualOrgs();
-            const action = orgs[index].isFavorite
-              ? "adicionada aos"
-              : "removida dos";
-            showToast("Org " + action + " favoritos", "success", 2000);
-          });
-        }
-      });
+      this.trackEvent("upgrade_clicked", { source: "popup" });
     }
-  }
 
-  // Enhanced org opening functions
-  function openOrgManually(url, alias) {
-    chrome.tabs.create({ url: url });
-    trackOrgOpen("manual", alias);
+    openHelpPage() {
+      chrome.tabs.create({
+        url: "https://victorbrandaao.github.io/salesforce-arc-pilot-landing",
+      });
+      this.trackEvent("help_clicked");
+    }
 
-    // Send analytics to background
-    chrome.runtime.sendMessage({
-      action: "updateAnalytics",
-      type: "manual",
-    });
+    contactSupport() {
+      chrome.tabs.create({
+        url: "mailto:support@salesforcearcpilot.com?subject=Suporte%20-%20Salesforce%20Arc%20Pilot",
+      });
+      this.trackEvent("support_contacted");
+    }
 
-    // Send notification
-    sendNotification("Org Aberta", alias + " foi aberta com sucesso");
-
-    showToast("Abrindo " + alias + "...", "success", 2000);
-    window.close();
-  }
-
-  function deleteManualOrg(index) {
-    chrome.storage.sync.get(["salesforceOrgs"], (result) => {
-      const orgs = result.salesforceOrgs || [];
-      const orgAlias = orgs[index]?.alias;
-
-      if (confirm(chrome.i18n.getMessage("confirmDelete"))) {
-        orgs.splice(index, 1);
-        chrome.storage.sync.set({ salesforceOrgs: orgs }, () => {
-          loadManualOrgs();
-          showToast('Org "' + orgAlias + '" removida', "success", 2000);
-        });
+    async syncOrgs() {
+      if (!this.subscription.features.cloudSync) {
+        this.openModal("upgrade-modal");
+        return;
       }
-    });
-  }
 
-  function openOrgViaCli(alias) {
-    const serverUrl = "http://localhost:3000/open-org";
+      try {
+        this.showLoading(true);
 
-    // Show loading toast
-    showToast("Abrindo " + alias + " via CLI...", "info", 2000);
+        // Simulate sync with backend
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    fetch(serverUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ alias: alias }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          return response.json().then((errorData) => {
-            throw new Error(
-              errorData.message || "Erro desconhecido do servidor local."
-            );
-          });
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Resposta do servidor local:", data);
-        if (data.success) {
-          trackOrgOpen("cli", alias);
-
-          // Send analytics to background
-          chrome.runtime.sendMessage({
-            action: "updateAnalytics",
-            type: "cli",
-          });
-
-          // Send notification
-          sendNotification(
-            "Org Aberta via CLI",
-            alias + " foi aberta com sucesso"
-          );
-
-          showToast(alias + " aberta com sucesso!", "success", 3000);
-          window.close();
-        } else {
-          showToast(
-            "Erro ao abrir " + alias + ": " + data.message,
-            "error",
-            5000
-          );
-        }
-      })
-      .catch((error) => {
-        console.error("Erro ao comunicar com o servidor local:", error);
-        if (error.message.includes("Failed to fetch")) {
-          showToast(chrome.i18n.getMessage("serverNotRunningError"), "error");
-        } else {
-          showToast(
-            chrome.i18n.getMessage("serverCommunicationError", [error.message]),
-            "error"
-          );
-        }
-      });
-  }
-
-  // === PIX DONATION SYSTEM ===
-
-  // Initialize PIX donation components
-  function initializePIXDonation() {
-    // Toggle donation section
-    if (toggleDonationBtn && donationContent) {
-      toggleDonationBtn.addEventListener("click", () => {
-        const isExpanded = donationContent.style.display !== "none";
-        donationContent.style.display = isExpanded ? "none" : "block";
-
-        // Update button icon rotation
-        const icon = toggleDonationBtn.querySelector("svg");
-        if (icon) {
-          icon.style.transform = isExpanded ? "rotate(0deg)" : "rotate(180deg)";
-        }
-
-        // Update aria-expanded for accessibility
-        toggleDonationBtn.setAttribute("aria-expanded", !isExpanded);
-      });
+        this.showNotification("Orgs sincronizadas com sucesso!", "success");
+        this.trackEvent("orgs_synced");
+      } catch (error) {
+        console.error("Error syncing orgs:", error);
+        this.showNotification("Erro ao sincronizar orgs", "error");
+      } finally {
+        this.showLoading(false);
+      }
     }
 
-    // Copy PIX key functionality
-    if (copyPixBtn && pixKey) {
-      copyPixBtn.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(pixKey.value);
-          showToast(
-            chrome.i18n.getMessage("pixKeyCopied") || "Chave PIX copiada! 💚",
-            "success"
-          );
-
-          // Visual feedback
-          copyPixBtn.classList.add("copied");
-          setTimeout(() => {
-            copyPixBtn.classList.remove("copied");
-          }, 1000);
-        } catch (error) {
-          console.error("Error copying PIX key:", error);
-          showToast("Erro ao copiar chave PIX", "error");
-        }
-      });
+    showLoading(show) {
+      const overlay = document.getElementById("loading-overlay");
+      overlay.style.display = show ? "flex" : "none";
     }
 
-    // Amount button interactions
-    amountButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        // Remove active class from all buttons
-        amountButtons.forEach((btn) => btn.classList.remove("active"));
+    showNotification(message, type = "success") {
+      const container = document.getElementById("notification-container");
+      const notification = document.createElement("div");
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-${
+                  type === "success" ? "check" : "exclamation-triangle"
+                }"></i>
+                <span style="font-size: 12px;">${message}</span>
+            </div>
+        `;
 
-        // Add active class to clicked button
-        button.classList.add("active");
+      container.appendChild(notification);
+      setTimeout(() => notification.classList.add("show"), 100);
 
-        const amount = button.dataset.amount;
-        showToast("Valor sugerido: R$ " + amount, "info", 2000);
+      setTimeout(() => {
+        notification.classList.remove("show");
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
 
-        // Analytics tracking
+    trackEvent(event, data = {}) {
+      try {
         chrome.runtime.sendMessage({
-          action: "trackDonationIntent",
-          amount: amount,
+          type: "TRACK_EVENT",
+          event,
+          data: { ...data, timestamp: Date.now() },
         });
+      } catch (error) {
+        console.error("Error tracking event:", error);
+      }
+    }
+
+    trackOrgAccess(org) {
+      chrome.runtime.sendMessage({
+        type: "TRACK_ORG_ACCESS",
+        orgId: org.id,
+        orgType: org.type,
+        timestamp: new Date().toISOString(),
       });
-    });
+    }
+
+    // Utility functions
+    getOrgIcon(type) {
+      const icons = {
+        production: "building",
+        sandbox: "flask",
+        developer: "code",
+        trailhead: "graduation-cap",
+      };
+      return icons[type] || "cloud";
+    }
+
+    getOrgTypeLabel(type) {
+      const labels = {
+        production: "Produção",
+        sandbox: "Sandbox",
+        developer: "Developer",
+        trailhead: "Trailhead",
+      };
+      return labels[type] || type;
+    }
+
+    truncateUrl(url) {
+      try {
+        const urlObj = new URL(url);
+        return urlObj.hostname;
+      } catch {
+        return url.length > 30 ? url.substring(0, 30) + "..." : url;
+      }
+    }
+
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diff = now - date;
+
+      if (diff < 60000) return "Agora";
+      if (diff < 3600000) return `${Math.floor(diff / 60000)}m atrás`;
+      if (diff < 86400000) return `${Math.floor(diff / 3600000)}h atrás`;
+
+      return date.toLocaleDateString("pt-BR");
+    }
   }
 
-  // Initialize PIX donation modal (footer modal)
-  function initializePIXModal() {
-    const donateBtn = document.getElementById("donate-btn");
-    const donationModal = document.getElementById("donation-modal");
-    const closeModalBtn = document.getElementById("close-modal");
-    const modalOverlay = donationModal?.querySelector(".modal-overlay");
-    const copyPixModalBtn = document.getElementById("copy-pix");
-    const pixKeyModal = document.querySelector("#donation-modal #pix-key");
-    const modalAmountButtons = document.querySelectorAll(
-      "#donation-modal .amount-btn"
-    );
-
-    // Open modal
-    if (donateBtn && donationModal) {
-      donateBtn.addEventListener("click", () => {
-        donationModal.style.display = "flex";
-        donationModal.setAttribute("aria-hidden", "false");
-
-        // Track modal open
-        chrome.runtime.sendMessage({
-          action: "trackDonationModalOpen",
-        });
-      });
-    }
-
-    // Close modal functions
-    function closeDonationModal() {
-      if (donationModal) {
-        donationModal.style.display = "none";
-        donationModal.setAttribute("aria-hidden", "true");
-      }
-    }
-
-    // Close modal events
-    if (closeModalBtn) {
-      closeModalBtn.addEventListener("click", closeDonationModal);
-    }
-
-    if (modalOverlay) {
-      modalOverlay.addEventListener("click", closeDonationModal);
-    }
-
-    // Copy PIX key in modal
-    if (copyPixModalBtn && pixKeyModal) {
-      copyPixModalBtn.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(pixKeyModal.value);
-          showToast(chrome.i18n.getMessage("pixKeyCopied"), "success");
-
-          // Visual feedback
-          copyPixModalBtn.classList.add("copied");
-          setTimeout(() => {
-            copyPixModalBtn.classList.remove("copied");
-          }, 1000);
-        } catch (error) {
-          console.error("Error copying PIX key:", error);
-          showToast("Erro ao copiar chave PIX", "error");
-        }
-      });
-    }
-
-    // Modal amount buttons
-    modalAmountButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        // Remove active class from all modal buttons
-        modalAmountButtons.forEach((btn) => btn.classList.remove("active"));
-
-        // Add active class to clicked button
-        button.classList.add("active");
-
-        const amount = button.dataset.amount;
-        showToast("Valor selecionado: R$ " + amount, "success", 2000);
-
-        // Analytics tracking
-        chrome.runtime.sendMessage({
-          action: "trackDonationIntent",
-          amount: amount,
-          source: "modal",
-        });
-      });
-    });
-  }
-
-  // Keyboard shortcuts
-  document.addEventListener("keydown", (e) => {
-    // Ctrl/Cmd + K to focus search
-    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-      e.preventDefault();
-      if (searchInput) {
-        searchInput.focus();
-      }
-    }
-
-    // Escape to close modals
-    if (e.key === "Escape") {
-      // Close settings modal
-      if (settingsModal && settingsModal.style.display === "flex") {
-        settingsModal.style.display = "none";
-      }
-
-      // Close donation modal
-      const donationModal = document.getElementById("donation-modal");
-      if (donationModal && donationModal.style.display === "flex") {
-        donationModal.style.display = "none";
-        donationModal.setAttribute("aria-hidden", "true");
-      }
-    }
+  // Initialize app when DOM is ready
+  document.addEventListener("DOMContentLoaded", () => {
+    window.app = new SalesforceArcPilot();
   });
 
-  // Initialize the extension
-  updateStatus("loading");
+  // Handle external messages
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "SUBSCRIPTION_UPDATED") {
+      window.app.subscription = message.subscription;
+      window.app.updateSubscriptionStatus();
+      window.app.updateOrgCount();
+      window.app.updateUI();
+    }
+  });
 });
