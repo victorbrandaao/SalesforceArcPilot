@@ -1,0 +1,31 @@
+# Files to ignore during deployment
+node_modules/
+*.log
+.DS_Store
+.env
+.git/
+
+# Extension files (not needed for backend)
+popup/
+background/
+content/
+icons/
+_locales/
+manifest.json
+
+# Documentation (not needed for backend)
+*.md
+CHANGELOG.md
+GUIA_*.md
+SOCIAL_MEDIA_POSTS.md
+
+# Scripts (not needed for backend)
+scripts/
+test-extension.sh
+separate-for-deploy.sh
+
+# Frontend assets (not needed for backend)
+landing-page/
+local-server/
+translations/
+shared/

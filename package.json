@@ -1,0 +1,25 @@
+{
+  "name": "salesforce-arc-pilot-backend",
+  "version": "1.0.0",
+  "description": "Free backend for Salesforce Arc Pilot",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js",
+    "build": "echo 'No build needed - API only'"
+  },
+  "dependencies": {
+    "cors": "2.8.5",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=18.x"
+  },
+  "keywords": [
+    "salesforce",
+    "chrome-extension",
+    "backend"
+  ],
+  "author": "Victor Brandão",
+  "license": "MIT"
+}

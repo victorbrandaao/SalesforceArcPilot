@@ -1,0 +1,11 @@
+# Railway Configuration
+# This tells Railway how to deploy the app
+
+[build]
+  cmd = "npm install"
+
+[start]
+  cmd = "npm start"
+
+[variables]
+  NODE_ENV = "production"
