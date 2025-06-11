@@ -113,5 +113,25 @@
   },
   "invalidUrlError": { "message": "URL must be a valid Salesforce domain" },
   "toggleFormShow": { "message": "Add Manual Org" },
-  "toggleFormHide": { "message": "Hide Form" }
+  "toggleFormHide": { "message": "Hide Form" },
+  "extensionName": {
+    "message": "Salesforce Arc Pilot",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "The most complete extension for Salesforce developers",
+    "description": "Extension description"
+  },
+  "popupTitle": {
+    "message": "Your Salesforce Orgs",
+    "description": "Popup title"
+  },
+  "addOrg": {
+    "message": "Add Org",
+    "description": "Button to add new org"
+  },
+  "searchPlaceholder": {
+    "message": "Search orgs...",
+    "description": "Search field placeholder"
+  }
 }

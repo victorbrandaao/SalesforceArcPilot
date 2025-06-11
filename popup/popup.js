@@ -128,6 +128,28 @@ document.addEventListener("DOMContentLoaded", () => {
           element.textContent = translation;
         }
       });
+
+      // Update placeholders
+      document
+        .querySelectorAll("[data-i18n-placeholder]")
+        .forEach((element) => {
+          const key = element.getAttribute("data-i18n-placeholder");
+          const translation = this.getNestedTranslation(translations, key);
+
+          if (translation) {
+            element.placeholder = translation;
+          }
+        });
+
+      // Update titles and aria-labels
+      document.querySelectorAll("[data-i18n-title]").forEach((element) => {
+        const key = element.getAttribute("data-i18n-title");
+        const translation = this.getNestedTranslation(translations, key);
+
+        if (translation) {
+          element.title = translation;
+        }
+      });
     }
 
     getNestedTranslation(obj, key) {
@@ -249,6 +271,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     getOrgTypeLabel(type) {
+      const translations = window.translations[this.currentLang];
+      if (translations && translations.orgTypes) {
+        return translations.orgTypes[type] || type;
+      }
+
+      // Fallback labels
       const labels = {
         production: "Produção",
         sandbox: "Sandbox",
@@ -320,10 +348,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Validate
       if (!orgData.name || !orgData.url || !orgData.type) {
-        this.showNotification(
-          "Por favor, preencha todos os campos obrigatórios",
-          "error"
-        );
+        const translations = window.translations[this.currentLang];
+        const message =
+          translations?.notifications?.fillFields ||
+          "Por favor, preencha todos os campos obrigatórios";
+        this.showNotification(message, "error");
         return;
       }
 
@@ -334,7 +363,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (response.success) {
-          this.showNotification("Org adicionada com sucesso!", "success");
+          const translations = window.translations[this.currentLang];
+          const message =
+            translations?.notifications?.orgAdded ||
+            "Org adicionada com sucesso!";
+          this.showNotification(message, "success");
           this.hideModal("add-org-modal");
           form.reset();
 

@@ -42,7 +42,10 @@
     "message": "⚠️ Servidor local não está rodando. Inicie o servidor para usar recursos CLI."
   },
   "cliListError": { "message": "Erro ao listar organizações CLI: {0}" },
-  "searchPlaceholder": { "message": "🔍 Buscar organizações..." },
+  "searchPlaceholder": {
+    "message": "Buscar orgs...",
+    "description": "Placeholder do campo de busca"
+  },
   "filterAll": { "message": "Todas Orgs" },
   "filterCli": { "message": "Apenas CLI" },
   "filterManual": { "message": "Apenas Manual" },
@@ -119,5 +122,10 @@
   },
   "invalidUrlError": { "message": "URL deve ser um domínio Salesforce válido" },
   "toggleFormShow": { "message": "Adicionar Org Manual" },
-  "toggleFormHide": { "message": "Ocultar Formulário" }
+  "toggleFormHide": { "message": "Ocultar Formulário" },
+  "fillFieldsError": {
+    "message": "Por favor, preencha todos os campos obrigatórios"
+  },
+  "orgAccessedSuccess": { "message": "Organização acessada com sucesso!" },
+  "accessCount": { "message": "acessos" }
 }
